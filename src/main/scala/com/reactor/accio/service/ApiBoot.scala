@@ -15,6 +15,10 @@ import com.reactor.base.patterns.listeners.Listener
 import akka.cluster.ClusterEvent.ClusterDomainEvent
 import com.reactor.base.patterns.listeners.Listener
 import akka.actor.ActorRef
+import com.reactor.base.patterns.pull.FlowControlFactory
+import akka.cluster.routing.ClusterRouterConfig
+import akka.cluster.routing.AdaptiveLoadBalancingRouter
+import akka.cluster.routing.ClusterRouterSettings
 
 
 //class ApiBoot(args: Array[String]) extends Bootable {
@@ -37,23 +41,14 @@ class ApiBoot extends Bootable {
           val supervisor_role = "accio-frontend"
           val default_parallelization = 1
 		    
-		  // Splitting master
-//		  val splitMaster = system.actorOf(Props(classOf[SplitMaster], default_parallelization, worker_role).withRouter(ClusterRouterConfig(RoundRobinRouter(), 
-//			ClusterRouterSettings(
-//			totalInstances = 100, maxInstancesPerNode = 1,
-//			allowLocalRoutees = true, useRole = Some(supervisor_role)))),
-//			name = "splitMaster")
-
-			
 		// Actor actually handling the requests
-//   		val service = system.actorOf(Props(classOf[ApiActor], reductoMaster).withRouter(	
-//    	  ClusterRouterConfig(AdaptiveLoadBalancingRouter(akka.cluster.routing.MixMetricsSelector), 
-//    	  ClusterRouterSettings(
-//    	  totalInstances = 100, maxInstancesPerNode = 1,
-//    	  allowLocalRoutees = true, useRole = Some("reducto-frontend")))),
-//    	  name = "serviceRouter")
+   		val service = system.actorOf(Props(classOf[ApiActor]).withRouter(	
+    	  ClusterRouterConfig(AdaptiveLoadBalancingRouter(akka.cluster.routing.MixMetricsSelector), 
+    	  ClusterRouterSettings(
+    	  totalInstances = 100, maxInstancesPerNode = 1,
+    	  allowLocalRoutees = true, useRole = Some("accio-frontend")))),
+    	  name = "serviceRouter")
     		 
-       val service:ActorRef = null;
        IO(Http) ! Http.Bind(service, interface = "0.0.0.0", port = 8080)
     }
   

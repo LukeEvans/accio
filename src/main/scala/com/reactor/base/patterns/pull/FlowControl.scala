@@ -10,7 +10,7 @@ import akka.actor.ActorLogging
 import com.reactor.base.patterns.pull.MasterWorkerProtocol._
 import akka.actor.ActorContext
 
-abstract class FlowControlArgs() {
+class FlowControlArgs() {
   var master:ActorRef = null
   var manager:ActorRef = null
   
@@ -30,7 +30,7 @@ abstract class FlowControlArgs() {
   
 }
 
-case class FlowControlConfig(name:String, actorType:String, parallel:Int=1, role:String="kc-frontend")
+case class FlowControlConfig(name:String, actorType:String, parallel:Int=1, role:String="accio-frontend")
 
 object FlowControlFactory extends {
   def flowControlledActorFor(context:ActorContext, flowConfig:FlowControlConfig, args:FlowControlArgs): ActorRef = {

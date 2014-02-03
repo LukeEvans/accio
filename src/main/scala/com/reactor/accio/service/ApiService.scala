@@ -32,12 +32,21 @@ import com.reactor.base.patterns.throttle.Throttler.SetTarget
 import com.reactor.base.patterns.throttle.Throttler.Queue
 import com.reactor.accio.transport.Messages._
 import com.reactor.accio.transport.AccioRequest
+import com.reactor.base.patterns.pull.FlowControlConfig
+import com.reactor.base.patterns.pull.FlowControlFactory
+import com.reactor.base.patterns.pull.FlowControlConfig
+import com.reactor.base.patterns.pull.FlowControlArgs
 
-class ApiActor(accio:ActorRef) extends Actor with ApiService {
+class ApiActor() extends Actor with ApiService {
   def actorRefFactory = context
    	
   println("Starting API Service actor...")
-  val accioPipeline = accio
+  
+  // Build Pipeline
+  val pipeLineFlowConfig = FlowControlConfig(name="accioPipeline", actorType="com.reactor.accio.pipeline.AccioPipeline")
+  val accioPipeline = FlowControlFactory.flowControlledActorFor(context, pipeLineFlowConfig, new FlowControlArgs())
+  
+  // Set up throttler
   val dispatcher = actorRefFactory.actorOf(Props(classOf[Dispatcher], accioPipeline), "dispatcher")
   val throttler = actorRefFactory.actorOf(Props(new TimerBasedThrottler(new Rate(40, 1 seconds))))
   
