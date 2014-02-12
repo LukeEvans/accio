@@ -26,7 +26,6 @@ class Extractor(args:FlowControlArgs) extends FlowControlActor(args) {
 	    val origin = sender
 	    process(metaData, origin)
 	    complete()
-	    println("\nExtractor Done!!\n")
 	}
 	
 	// Process

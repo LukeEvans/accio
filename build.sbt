@@ -16,6 +16,12 @@ atmosSettings
 
 traceAkka("2.2.3")
 
+libraryDependencies += "com.tinkerpop.rexster" % "rexster-protocol" % "2.4.0" excludeAll(
+        ExclusionRule(organization = "javax.jms"),
+        ExclusionRule(organization = "com.sun.jdmk"),
+        ExclusionRule(organization = "com.sun.jmx")
+)
+
 libraryDependencies += "com.typesafe.akka" % "akka-actor_2.10" % "2.2.3"
 
 libraryDependencies += "com.typesafe.akka" % "akka-remote_2.10" % "2.2.3"

@@ -26,7 +26,6 @@ class Disambiguator(args:FlowControlArgs) extends FlowControlActor(args) {
 	
 	def receive = {
 	  case MetadataContainer(metaData) =>
-	    println("\nDisambig Starting!!\n")
 	    val origin = sender
 	    process(metaData, origin)
 	    complete()

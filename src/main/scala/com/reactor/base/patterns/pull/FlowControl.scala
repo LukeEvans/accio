@@ -75,6 +75,7 @@ class FlowControlWorker(config:FlowControlConfig, args:FlowControlArgs) extends 
 
 abstract class FlowControlActor(args:FlowControlArgs) extends Actor with ActorLogging {
 	
+	
 	// Tell manager that we're ready for work
     def ready() {
 	  args.manager ! ReadyForWork

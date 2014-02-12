@@ -12,16 +12,18 @@ import scala.collection.mutable.ArrayBuffer
 import java.util.regex.Pattern
 import scala.collection.JavaConversions._
 import com.reactor.accio.transport.MetadataContainer
+import com.reactor.accio.graphdb.GraphDB
+import com.reactor.accio.metadata.Candidate
 import scala.concurrent.Future
-import com.reactor.accio.metadata.connections.ConnectionSet
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 import scala.util.Failure
-import com.reactor.accio.graphdb.GraphDB
+import scala.collection.JavaConversions._
+import com.fasterxml.jackson.databind.JsonNode
 
 // Extractor actor
-class Connector(args:FlowControlArgs) extends FlowControlActor(args) {
-  
+class Describer(args:FlowControlArgs) extends FlowControlActor(args) {
+	
 	// Graph database
 	val graphdb = new GraphDB()
 	
@@ -37,37 +39,34 @@ class Connector(args:FlowControlArgs) extends FlowControlActor(args) {
 	
 	// Process
 	def process(metaData:MetaData, origin:ActorRef) {
-	  
-		// Get the matrix
-		metaData.initConnectionMatrix();
-
-		// Fetch each set
-		val sets = metaData.connection_matrix.grabSets.toList
-		val futures: List[Future[Option[ConnectionSet]]] = sets map { set =>
-	  		Future { fetch(set)  }
-		}
-	  
+		
+		val futures = new ArrayBuffer[Future[Option[Candidate]]]()
+		
+		metaData.keywords.toList map { keyword =>
+			keyword.candidates.toList map { candidate =>
+				futures += Future { fetch(candidate) }
+			}
+		}	  
+		
 		// Sequence list
 		Future.sequence(futures) onComplete {
 	  		case Success(completed) => 
 	  			val connectedMetaData = metaData.copy
-	  			connectedMetaData.prune
 	  			reply(origin, MetadataContainer(connectedMetaData))
 	  		case Failure(e) => 
 	  			log.error("An error has occurred: " + e.getMessage())
-	  }
-	  
+	  }		
 	}
 	
-
-	// Fetching
-	def fetch(set:ConnectionSet): Option[ConnectionSet] = {
-	  val results: Option[ConnectionSet] = graphdb.findConnections(set)
+	// Fetch
+	def fetch(candidate:Candidate): Option[Candidate] = {
+	  val results: Option[JsonNode] = graphdb.findVertexDetails(candidate.mid)
 	 
 	  results match {
-	    case Some(results) => 
-	      set.connections = results.connections
-	      return Some( set )
+	    case Some(details) => 
+	      candidate.grabVertexMetaData(details);
+	      return Some( candidate )
+	      
 	    case None =>
 	    	println("None")
 	    	return None

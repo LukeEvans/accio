@@ -31,7 +31,7 @@ class AccioPipeline(args:FlowControlArgs) extends FlowControlActor(args) {
   val disambig = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="disambig", actorType="com.reactor.accio.pipeline.Disambiguator"))
   val connector = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="connector", actorType="com.reactor.accio.pipeline.Connector"))
   val describer = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="describer", actorType="com.reactor.accio.pipeline.Describer"))
-  val confluence = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="confluence", actorType="com.reactor.accio.pipeline.Confluence"))
+  val confluence = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="confluence", actorType="com.reactor.accio.pipeline.confluence.Confluence"))
   
   // Ready
   ready()
@@ -59,8 +59,8 @@ class AccioPipeline(args:FlowControlArgs) extends FlowControlActor(args) {
 	    disambiguated <- (disambig ? extracted).mapTo[MetadataContainer]
 	    connected <- (connector ? disambiguated).mapTo[MetadataContainer]
 	    described <- (describer ? connected).mapTo[MetadataContainer]
-	    confluenced <- (confluence ? described).mapTo[MetadataContainer]
-	  } yield connected
+//	    confluenced <- (confluence ? described).mapTo[MetadataContainer]
+	  } yield described
 	  
 	  completed onComplete {
 	  	case Success(metadataResponse) => 
