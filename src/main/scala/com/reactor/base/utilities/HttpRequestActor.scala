@@ -2,7 +2,7 @@ package com.reactor.base.utilities
 
 import akka.actor._
 import akka.pattern.ask
-import com.reactor.accio.transport.Messages._
+import com.reactor.base.transport._
 import com.fasterxml.jackson.databind.JsonNode
 import spray.http._
 import scala.concurrent.Future

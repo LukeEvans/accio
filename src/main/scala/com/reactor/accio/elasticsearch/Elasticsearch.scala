@@ -10,36 +10,17 @@ import akka.actor.Props
 import akka.cluster.routing.ClusterRouterConfig
 import akka.routing.RoundRobinRouter
 import akka.cluster.routing.ClusterRouterSettings
+import com.reactor.base.patterns.pull.FlowControlActor
+import com.reactor.base.patterns.pull.FlowControlArgs
 
-// Elasticsearch Master
-class ElasticsearchMaster(parallel:Int, role:String) extends Master("accio-elasticsearh-master") {
-	log.info("Elasticsearch master starting...")
+// Elasticsearch Actor
+class Elasticsearch(args:FlowControlArgs) extends FlowControlActor(args) {
+  
+	// Ready
+	ready()
 	
-	// elasticsearch router
-	val elasticsearchRouter = context.actorOf(Props(classOf[ElasticsearchWorker], self).withRouter(ClusterRouterConfig(RoundRobinRouter(), 
-      ClusterRouterSettings(
-	  totalInstances = 1000, maxInstancesPerNode = parallel,
-	  allowLocalRoutees = true, useRole = Some(role)))),
-	  name = "elasticsearchRouter")
-}
-
-// Elasticsearch Worker
-class ElasticsearchWorker(master: ActorRef) extends Worker(master) {
- 
-  log.info("Elasticsearch Worker staring")
-  
-  implicit val ec = context.dispatcher
-  val elasticsearch = context.actorOf(Props(classOf[ElasticsearchActor], self))
-  
-  // Handle work
-  def doWork(workSender: ActorRef, msg: Any): Unit = {
-      elasticsearch.tell(msg, workSender)
-  } 
-}
-
-// Elasticsearchor actor
-class ElasticsearchActor extends Actor with ActorLogging {
 	def receive = {
 	  case _ =>
+	    complete()
 	}
 }

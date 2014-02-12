@@ -12,7 +12,7 @@ import akka.actor.ReceiveTimeout
 import com.reactor.base.patterns.monitoring.MonitoredActor
 import scala.compat.Platform
 import com.reactor.base.patterns.pull.MasterWorkerProtocol._ 
-import com.reactor.accio.transport.Messages._
+import com.reactor.base.transport._
 
 class PerRequestActor(startTime: Long, ctx: RequestContext, mapper: ObjectMapper) extends MonitoredActor("per-request-actor") with ActorLogging {
     
@@ -24,8 +24,8 @@ class PerRequestActor(startTime: Long, ctx: RequestContext, mapper: ObjectMapper
 	setReceiveTimeout(5.seconds)
   
 	def receive = {
-		case ResponseContainer(response) =>
-		  complete(OK, response.finishResponse(startTime, mapper))
+		case response:RESTResponse =>
+		  complete(OK, response.finish(startTime, mapper))
 		case ReceiveTimeout => 
 		  val error = Error("Request timeout")
 		  val errString = mapper.writeValueAsString(error)

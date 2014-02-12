@@ -19,16 +19,16 @@ import com.reactor.base.patterns.pull.FlowControlFactory
 import akka.cluster.routing.ClusterRouterConfig
 import akka.cluster.routing.AdaptiveLoadBalancingRouter
 import akka.cluster.routing.ClusterRouterSettings
+import com.reactor.base.patterns.pull.FlowControlConfig
 
 
-//class ApiBoot(args: Array[String]) extends Bootable {
 class ApiBoot extends Bootable {
 
 	val ip = IPTools.getPrivateIp();
       
 	println("IP: " + ip)
 	
-	val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=2552") 
+	val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=2551") 
       .withFallback(ConfigFactory.parseString("akka.cluster.roles = [accio-frontend]\nakka.remote.netty.tcp.hostname=\""+ip+"\"")).withFallback(ConfigFactory.load("accio"))
       
     implicit val system = ActorSystem("Accio-0-1", config)

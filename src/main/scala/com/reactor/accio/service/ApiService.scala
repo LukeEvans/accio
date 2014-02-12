@@ -30,21 +30,22 @@ import spray.routing.directives.FieldDefMagnet.apply
 import com.reactor.base.patterns.throttle.TimerBasedThrottler
 import com.reactor.base.patterns.throttle.Throttler.SetTarget
 import com.reactor.base.patterns.throttle.Throttler.Queue
-import com.reactor.accio.transport.Messages._
 import com.reactor.accio.transport.AccioRequest
 import com.reactor.base.patterns.pull.FlowControlConfig
 import com.reactor.base.patterns.pull.FlowControlFactory
 import com.reactor.base.patterns.pull.FlowControlConfig
 import com.reactor.base.patterns.pull.FlowControlArgs
+import com.reactor.base.transport._
+import com.reactor.base.patterns.pull.FlowControlConfig
+import com.reactor.accio.pipeline.AccioArgs
 
 class ApiActor() extends Actor with ApiService {
   def actorRefFactory = context
    	
   println("Starting API Service actor...")
   
-  // Build Pipeline
-  val pipeLineFlowConfig = FlowControlConfig(name="accioPipeline", actorType="com.reactor.accio.pipeline.AccioPipeline")
-  val accioPipeline = FlowControlFactory.flowControlledActorFor(context, pipeLineFlowConfig, new FlowControlArgs())
+  // Pipeline
+  val accioPipeline = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="accioPipeline", actorType="com.reactor.accio.pipeline.AccioPipeline"))
   
   // Set up throttler
   val dispatcher = actorRefFactory.actorOf(Props(classOf[Dispatcher], accioPipeline), "dispatcher")
@@ -114,7 +115,7 @@ trait ApiService extends HttpService {
                 get{
                   respondWithMediaType(MediaTypes.`application/json`){
                           entity(as[HttpRequest]){ obj => ctx =>
-                          	val request = new AccioRequest(obj, "TEXT")
+                          	val request = new AccioRequest(obj)
                             initiateRequest(request, ctx)
                           }
                   }        
@@ -122,7 +123,7 @@ trait ApiService extends HttpService {
                 post{              
                   respondWithMediaType(MediaTypes.`application/json`){
                           entity(as[String]){ obj => ctx =>
-                          	val request = new AccioRequest(obj, "TEXT")
+                          	val request = new AccioRequest(obj)
                             initiateRequest(request, ctx)
                           }
                   }        

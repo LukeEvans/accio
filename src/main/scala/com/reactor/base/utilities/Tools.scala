@@ -116,7 +116,7 @@ object Tools {
     return md5
   }
 
-    def fetchURL(url:String):JsonNode = {
+    def fetchURL(url:String): Option[JsonNode] = {
         try {
                 var httpClient = new DefaultHttpClient();
                 httpClient.getParams().setParameter("http.socket.timeout", new Integer(20000));
@@ -128,13 +128,13 @@ object Tools {
                         // Return JSON
                         var mapper = new ObjectMapper();
                         var reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
-                        return mapper.readTree(reader);
+                        return Some (mapper.readTree(reader) );
 
                 } catch{
                   case e:Exception =>{
                         System.out.println("Failure: " + url);
                         e.printStackTrace();
-                        return null;
+                        return None;
                   }
                 }
      }

@@ -1,5 +1,3 @@
 package com.reactor.accio.transport
 
-trait TransportMessage extends Serializable {
-
-}
+trait TransportMessage extends Serializable

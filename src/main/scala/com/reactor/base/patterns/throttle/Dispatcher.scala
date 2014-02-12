@@ -10,7 +10,8 @@ import spray.http.StatusCodes._
 import spray.routing.RequestContext
 import com.reactor.base.patterns.monitoring.MonitoredActor
 import com.reactor.base.api.PerRequestActor
-import com.reactor.accio.transport.Messages._
+import com.reactor.base.transport._
+import akka.actor.ActorSelection
 
 class Dispatcher(reductoRouter:ActorRef) extends MonitoredActor("reducto-dispatcher"){
 

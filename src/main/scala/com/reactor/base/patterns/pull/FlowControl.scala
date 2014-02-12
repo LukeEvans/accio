@@ -9,8 +9,10 @@ import akka.actor.Actor
 import akka.actor.ActorLogging
 import com.reactor.base.patterns.pull.MasterWorkerProtocol._
 import akka.actor.ActorContext
+import akka.actor.ActorSystem
+import com.reactor.accio.transport.TransportMessage
 
-class FlowControlArgs() {
+class FlowControlArgs() extends TransportMessage {
   var master:ActorRef = null
   var manager:ActorRef = null
   
@@ -30,11 +32,15 @@ class FlowControlArgs() {
   
 }
 
-case class FlowControlConfig(name:String, actorType:String, parallel:Int=1, role:String="accio-frontend")
+case class FlowControlConfig(name:String, actorType:String, parallel:Int=1, role:String="accio-frontend") extends TransportMessage
 
 object FlowControlFactory extends {
-  def flowControlledActorFor(context:ActorContext, flowConfig:FlowControlConfig, args:FlowControlArgs): ActorRef = {
-	  context.actorOf(Props(classOf[FlowControlMaster], flowConfig, args))
+  def flowControlledActorForContext(context:ActorContext, flowConfig:FlowControlConfig, args:FlowControlArgs = new FlowControlArgs): ActorRef = {
+	  context.actorOf(Props(classOf[FlowControlMaster], flowConfig, args), flowConfig.name)
+  }
+  
+  def flowControlledActorForSystem(system:ActorSystem, flowConfig:FlowControlConfig, args:FlowControlArgs = new FlowControlArgs): ActorRef = {
+	  system.actorOf(Props(classOf[FlowControlMaster], flowConfig, args), flowConfig.name)
   }
 }
 
@@ -76,6 +82,11 @@ abstract class FlowControlActor(args:FlowControlArgs) extends Actor with ActorLo
 	
     // Complete work
 	def complete() {
-	  args.manager ! WorkComplete
+	  args.manager ! WorkComplete()
+	}
+	
+	// Return to sender from proper actor
+	def reply(origin:ActorRef, msg:Any) {
+	  origin.tell(msg, origin)
 	}
 }

@@ -7,7 +7,7 @@ import TimerBasedThrottler._
 import scala.util.control.NonFatal
 import scala.collection.immutable.{Queue => Q}
 import com.reactor.base.patterns.throttle.Throttler._
-import com.reactor.accio.transport.Messages._
+import com.reactor.base.transport._
 
 object TimerBasedThrottler {
   private[throttle] case object Tick

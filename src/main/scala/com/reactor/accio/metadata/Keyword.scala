@@ -6,9 +6,12 @@ import scala.collection.JavaConversions._
 import java.util.ArrayList
 import org.apache.commons.lang.builder.HashCodeBuilder
 
+object Keyword {
+  val MAX_CANDIDATES = 3
+}
+
 class Keyword {
 
-	val MAX_CANDIDATES = 3
 	var original_text:String = null
 	var connection_found:Boolean = false
 	var candidates:ArrayList[Candidate] = null

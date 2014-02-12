@@ -27,6 +27,7 @@ class MetaData {
 	//================================================================================
 	def addKeyword(keyword:Keyword) {
 		if (!keywords.contains(keyword)) {
+			println("Adding keyword")
 			keywords.add(keyword);
 		}
 	}
@@ -162,4 +163,12 @@ class MetaData {
 	def relatedIDList(): ArrayList[String] = {
 		return connection_matrix.findRelatedIds();
 	}
+	
+	//================================================================================
+	// Copy
+	//================================================================================
+	def copy(): MetaData = {
+		println("\n\nCopy method not done\n\n")
+		return this
+	}	
 }
