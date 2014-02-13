@@ -17,7 +17,7 @@ import com.reactor.accio.metadata.connections.ConnectionSet
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 import scala.util.Failure
-import com.reactor.accio.graphdb.GraphDB
+import com.reactor.accio.storage.GraphDB
 
 // Extractor actor
 class Connector(args:FlowControlArgs) extends FlowControlActor(args) {
@@ -31,7 +31,7 @@ class Connector(args:FlowControlArgs) extends FlowControlActor(args) {
 	def receive = {
 	  case MetadataContainer(metaData) =>
 	    val origin = sender
-	    process(metaData, origin)
+	    process(metaData.copy, origin)
 	    complete()
 	}
 	
@@ -50,7 +50,7 @@ class Connector(args:FlowControlArgs) extends FlowControlActor(args) {
 		// Sequence list
 		Future.sequence(futures) onComplete {
 	  		case Success(completed) => 
-	  			val connectedMetaData = metaData.copy
+	  			val connectedMetaData = metaData
 	  			connectedMetaData.prune
 	  			reply(origin, MetadataContainer(connectedMetaData))
 	  		case Failure(e) => 

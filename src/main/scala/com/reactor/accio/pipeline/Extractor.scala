@@ -24,7 +24,7 @@ class Extractor(args:FlowControlArgs) extends FlowControlActor(args) {
 	def receive = {
 	  case MetadataContainer(metaData) =>
 	    val origin = sender
-	    process(metaData, origin)
+	    process(metaData.copy, origin)
 	    complete()
 	}
 	
@@ -48,7 +48,7 @@ class Extractor(args:FlowControlArgs) extends FlowControlActor(args) {
 		  }
 		  
 		  // Reply
-		  reply(origin, MetadataContainer(metaData.copy()))
+		  reply(origin, MetadataContainer(metaData))
 	  
 	    case None =>
 	  }

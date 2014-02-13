@@ -12,7 +12,7 @@ import scala.collection.mutable.ArrayBuffer
 import java.util.regex.Pattern
 import scala.collection.JavaConversions._
 import com.reactor.accio.transport.MetadataContainer
-import com.reactor.accio.graphdb.GraphDB
+import com.reactor.accio.storage.GraphDB
 import com.reactor.accio.metadata.Candidate
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,7 +33,7 @@ class Describer(args:FlowControlArgs) extends FlowControlActor(args) {
 	def receive = {
 	  case MetadataContainer(metaData) =>
 	    val origin = sender
-	    process(metaData, origin)
+	    process(metaData.copy, origin)
 	    complete()
 	}
 	
@@ -51,11 +51,11 @@ class Describer(args:FlowControlArgs) extends FlowControlActor(args) {
 		// Sequence list
 		Future.sequence(futures) onComplete {
 	  		case Success(completed) => 
-	  			val connectedMetaData = metaData.copy
+	  			val connectedMetaData = metaData
 	  			reply(origin, MetadataContainer(connectedMetaData))
 	  		case Failure(e) => 
 	  			log.error("An error has occurred: " + e.getMessage())
-	  }		
+		}			
 	}
 	
 	// Fetch

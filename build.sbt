@@ -54,7 +54,7 @@ libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.5"
 
 libraryDependencies += "play" % "play_2.10" % "2.1.0"
 
-libraryDependencies += "org.elasticsearch" % "elasticsearch" % "0.90.0"
+libraryDependencies += "org.elasticsearch" % "elasticsearch" % "0.90.10"
 
 libraryDependencies += "org.apache.opennlp" % "opennlp-tools" % "1.5.3"
 
@@ -67,6 +67,8 @@ libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.13"
 libraryDependencies += "ch.qos.logback" % "logback-core"  % "1.0.13"
 
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5"
+
+libraryDependencies += "org.mongodb" %% "casbah" % "2.6.3"
 
 libraryDependencies += "com.typesafe.akka" % "akka-slf4j_2.10" % "2.2.3"
 

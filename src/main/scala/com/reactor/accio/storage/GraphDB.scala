@@ -1,17 +1,4 @@
-package com.reactor.accio.graphdb
-
-import com.reactor.base.patterns.pull.Master
-import com.reactor.base.patterns.pull.Worker
-import akka.actor.ActorRef
-import com.reactor.base.patterns.monitoring.MonitoredActor
-import akka.actor.Actor
-import akka.actor.ActorLogging
-import akka.actor.Props
-import akka.cluster.routing.ClusterRouterConfig
-import akka.routing.RoundRobinRouter
-import akka.cluster.routing.ClusterRouterSettings
-import com.reactor.base.patterns.pull.FlowControlActor
-import com.reactor.base.patterns.pull.FlowControlArgs
+package com.reactor.accio.storage
 import com.reactor.accio.metadata.connections.ConnectionSet
 import com.tinkerpop.rexster.client.RexsterClient
 import com.tinkerpop.rexster.client.RexsterClientFactory
@@ -19,6 +6,7 @@ import java.util.List
 import java.util.HashMap
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import java.util.ArrayList
 
 // GraphDB Master
 class GraphDB {
@@ -71,4 +59,25 @@ class GraphDB {
 			}
 		}  		
   	}
+  	
+  	// Find confluence node
+	def findConfluenceIDs(topic:ArrayList[String], related:ArrayList[String] = new ArrayList[String]()): Option[JsonNode] = {
+		try {
+			val results:List[String] = rexster.execute("g = rexster.getGraph('reactorgraph'); r = new Reactor(g); r.findConfluence(a,b)", 
+				    new HashMap[String, Object](){{
+				        put("a", topic);
+				        put("b", related);
+				    }});
+			
+			val jsonString = results.get(0);
+			val confluenceNode = mapper.readTree(jsonString);
+			
+			return Some ( confluenceNode )
+			
+		} catch {
+			case e:Exception => {
+				None
+			}
+		}
+	}  	
 }

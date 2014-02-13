@@ -27,7 +27,7 @@ class Disambiguator(args:FlowControlArgs) extends FlowControlActor(args) {
 	def receive = {
 	  case MetadataContainer(metaData) =>
 	    val origin = sender
-	    process(metaData, origin)
+	    process(metaData.copy, origin)
 	    complete()
 	}
 	
@@ -42,7 +42,7 @@ class Disambiguator(args:FlowControlArgs) extends FlowControlActor(args) {
 	  // Sequence list
 	  Future.sequence(futures) onComplete {
 	  	case Success(completed) => 
-	  	  reply(origin, MetadataContainer(metaData.copy()))
+	  	  reply(origin, MetadataContainer(metaData))
 	  	case Failure(e) => 
 	  	  log.error("An error has occurred: " + e.getMessage())
 	  }

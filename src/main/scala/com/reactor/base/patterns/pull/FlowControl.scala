@@ -36,11 +36,11 @@ case class FlowControlConfig(name:String, actorType:String, parallel:Int=1, role
 
 object FlowControlFactory extends {
   def flowControlledActorForContext(context:ActorContext, flowConfig:FlowControlConfig, args:FlowControlArgs = new FlowControlArgs): ActorRef = {
-	  context.actorOf(Props(classOf[FlowControlMaster], flowConfig, args), flowConfig.name)
+	  context.actorOf(Props(classOf[FlowControlMaster], flowConfig, args))
   }
   
   def flowControlledActorForSystem(system:ActorSystem, flowConfig:FlowControlConfig, args:FlowControlArgs = new FlowControlArgs): ActorRef = {
-	  system.actorOf(Props(classOf[FlowControlMaster], flowConfig, args), flowConfig.name)
+	  system.actorOf(Props(classOf[FlowControlMaster], flowConfig, args))
   }
 }
 
