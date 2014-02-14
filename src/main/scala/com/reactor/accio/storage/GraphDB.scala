@@ -28,7 +28,6 @@ class GraphDB {
 					    }});
 	
 				val jsonString = results.get(0); 
-				println(jsonString)
 				val setNode = mapper.readTree(jsonString);
 				
 				val newSet = new ConnectionSet(setNode);

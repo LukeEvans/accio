@@ -1,15 +1,15 @@
  package com.reactor.accio.metadata.confluence
  
- import scala.collection.mutable.ArrayBuffer
+import java.util.ArrayList
+ import scala.util.Random
+ 
+class Confluence() {
 
-class ConfluenceNode()
-
-class Confluence {
-
-	 val confluence_matrix = ArrayBuffer[ArrayBuffer[Any]]()
-	 
+	 val confluence_matrix = new ArrayList[ArrayList[Any]]()
+		 
 	 // Add a list of confluence nodes
-	 def addConfluenceNodes(confluenceNodes:ArrayBuffer[Any]) {
-		 confluence_matrix += confluenceNodes
+	 def addConfluenceNodes(confluenceNodes:ArrayList[Any]) {
+		 confluence_matrix.add(confluenceNodes)
 	 }
+	 
 }

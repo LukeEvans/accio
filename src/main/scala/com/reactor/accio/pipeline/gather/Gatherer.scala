@@ -10,7 +10,6 @@ import com.reactor.accio.transport.MetadataContainer
 import com.reactor.accio.metadata.Candidate
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future
-import com.reactor.accio.metadata.confluence.ConfluenceNode
 import com.reactor.accio.transport.ConfluenceNodeList
 import com.reactor.accio.transport.CandidateList
 import akka.util.Timeout
@@ -25,6 +24,8 @@ import com.reactor.accio.transport.IdList
 import com.reactor.base.patterns.pull.FlowControlFactory
 import com.reactor.base.patterns.pull.FlowControlConfig
 import com.reactor.accio.transport.MetadataContainer
+import com.reactor.accio.transport.StringList
+import java.util.ArrayList
 
 // Gather Types
 trait GatherType
@@ -40,13 +41,13 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	
 	// Start gatherers
 	val newsGatherer:ActorRef = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="newGatherer", actorType="com.reactor.accio.pipeline.gather.NewsGatherer"))
-	val twitterGatherer:ActorRef = null
-	val youtubeGatherer:ActorRef = null
-	val stocksGatherer:ActorRef = null
+	val twitterGatherer:ActorRef = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="twitterGatherer", actorType="com.reactor.accio.pipeline.gather.TwitterGatherer"))
+	val youtubeGatherer:ActorRef = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="youtubeGatherer", actorType="com.reactor.accio.pipeline.gather.YouTubeGatherer"))
+	val stocksGatherer:ActorRef = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="stockGatherer", actorType="com.reactor.accio.pipeline.gather.FinanceGatherer"))
 	
 	val news_list = ArrayBuffer[String]()
 	val twitter_list = ArrayBuffer[String]()
-	val stocks_list = ArrayBuffer[Candidate]()
+	val stocks_list = ArrayBuffer[String]()
 	
 	// Ready
 	ready()
@@ -88,21 +89,27 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	  	val futures = ArrayBuffer[Future[ConfluenceNodeList]]()
 	  	
 	  	// Start fetching everything
-	  	futures += (newsGatherer ? IdList(news_list)).mapTo[ConfluenceNodeList]
-	  	futures += (twitterGatherer ? IdList(twitter_list)).mapTo[ConfluenceNodeList] 
-//	  	futures += (youtubeGatherer ? metaData.free_text).mapTo[ConfluenceNodeList]
-//	  	futures += (stocksGatherer ? CandidateList(stocks_list)).mapTo[ConfluenceNodeList]
+	  	futures += (newsGatherer ? IdList(news_list.clone)).mapTo[ConfluenceNodeList]
+	  	futures += (twitterGatherer ? IdList(twitter_list.clone)).mapTo[ConfluenceNodeList] 
+	  	futures += (youtubeGatherer ? metaData.free_text).mapTo[ConfluenceNodeList]
+	  	futures += (stocksGatherer ? StringList(stocks_list.clone)).mapTo[ConfluenceNodeList]
 	  			
+	  	// Clear lists to start fresh on next call
+	  	news_list.clear
+	  	twitter_list.clear
+	  	stocks_list.clear
+	  	
 		Future.sequence(futures) onComplete {
 	  		case Success(completed) => 
 	  			completed map { list =>
-	  				metaData.confluence.addConfluenceNodes(list.confluenceNodes)
+	  				metaData.confluence.addConfluenceNodes(new ArrayList(list.confluenceNodes))
 	  			}
+	  			
+	  			reply(origin, MetadataContainer(metaData))
+	  			
 	  		case Failure(e) => 
 	  			log.error("An error has occurred: " + e.getMessage())
 		}	  	
-	  	
-	  	reply(origin, MetadataContainer(metaData))
 	}
 	
 	// Define the gather type of a candidate
@@ -129,7 +136,7 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 			case Some(gatherType) => 
 				gatherType match {
 					case t:Business =>
-						stocks_list += candiate
+						stocks_list += candiate.name
 					case _ => 
 			}
 				

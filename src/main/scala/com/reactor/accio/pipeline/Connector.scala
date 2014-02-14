@@ -69,7 +69,6 @@ class Connector(args:FlowControlArgs) extends FlowControlActor(args) {
 	      set.connections = results.connections
 	      return Some( set )
 	    case None =>
-	    	println("None")
 	    	return None
 	  }
 	}

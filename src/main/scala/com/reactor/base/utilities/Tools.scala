@@ -92,6 +92,10 @@ object Tools {
   }
   
   def generateHash(s:String):String = {
+  	if (s == null) {
+  		return s
+  	}
+  	
     return md5(s.toLowerCase())
   }
   
@@ -116,6 +120,7 @@ object Tools {
     return md5
   }
 
+  	// Fetch URL
     def fetchURL(url:String): Option[JsonNode] = {
         try {
                 var httpClient = new DefaultHttpClient();
@@ -138,7 +143,32 @@ object Tools {
                   }
                 }
      }
-    
+
+    	// Fetch yahoo URL
+        def fetchYahooURL(url:String): Option[JsonNode] = {
+	        try {
+	                var httpClient = new DefaultHttpClient();
+	                httpClient.getParams().setParameter("http.socket.timeout", new Integer(20000));
+	                        var getRequest = new HttpGet(parseUrl(url).toString());
+	                        getRequest.addHeader("accept", "application/json");
+	
+	                        var response = httpClient.execute(getRequest);
+	
+	                        // Return JSON
+	                        var mapper = new ObjectMapper();
+	                        var reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+	                        val results = reader.readLine().replaceAll("""YAHOO.Finance.SymbolSuggest.ssCallback\(""", "")
+	                        return Some ( mapper.readTree( results.replaceAll("""YAHOO.Finance.SymbolSuggest.ssCallback\(""", "")) );
+	
+	                } catch{
+	                  case e:Exception =>{
+	                        System.out.println("Failure: " + url);
+	                        e.printStackTrace();
+	                        return None;
+	                  }
+	                }
+  		}
+        
         //================================================================================
         // URL encoding Methods
         //================================================================================

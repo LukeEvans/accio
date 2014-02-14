@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import com.reactor.accio.transport.MetadataContainer
 import scala.util.Success
 import scala.util.Failure
-import com.reactor.accio.transport.MetadataContainer
+import com.reactor.base.transport._
 
 case class AccioArgs(extractor:ActorRef) extends FlowControlArgs
 
@@ -61,8 +61,8 @@ class AccioPipeline(args:FlowControlArgs) extends FlowControlActor(args) {
 	  } yield confluenced
 	  
 	  completed onComplete {
-	  	case Success(metadataResponse) => 
-	  	  origin ! metadataResponse
+	  	case Success(metadataResponse) =>
+	  		origin ! ResponseContainer(new RESTResponse(metadataResponse.metadata))
 	  	case Failure(e) => 
 	  	  log.error("An error has occurred: " + e.getMessage())
 	  }

@@ -24,7 +24,7 @@ class PerRequestActor(startTime: Long, ctx: RequestContext, mapper: ObjectMapper
 	setReceiveTimeout(5.seconds)
   
 	def receive = {
-		case response:RESTResponse =>
+		case ResponseContainer(response) =>
 		  complete(OK, response.finish(startTime, mapper))
 		case ReceiveTimeout => 
 		  val error = Error("Request timeout")
@@ -36,6 +36,7 @@ class PerRequestActor(startTime: Long, ctx: RequestContext, mapper: ObjectMapper
 		case fail: WorkFailed =>
 		  log.error("Got a fail message")
 		  stop(self)
+		  
 		case _ => 
 		  log.error("Got a message that I've never even heard of!")
 		  statsd.histogram("unrecognized.message", 1)

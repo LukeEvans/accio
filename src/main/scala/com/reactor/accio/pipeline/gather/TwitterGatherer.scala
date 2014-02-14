@@ -17,7 +17,7 @@ import com.reactor.accio.storage.Elasticsearch
 
 class TwitterGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 	
-	// Mongo
+	// Elasticsearch
 	val elasticsearch = new Elasticsearch()
 	
 	// Ready
