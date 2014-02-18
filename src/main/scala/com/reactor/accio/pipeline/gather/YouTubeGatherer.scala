@@ -5,7 +5,6 @@ import com.reactor.base.patterns.pull.FlowControlActor
 import com.reactor.accio.transport.IdList
 import akka.actor.ActorRef
 import scala.collection.mutable.ArrayBuffer
-import com.reactor.accio.metadata.confluence.ConfluenceNode
 import com.reactor.accio.storage.Mongo
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,6 +19,7 @@ import java.util.Date
 import scala.collection.JavaConversions._
 import java.text.SimpleDateFormat
 import com.reactor.accio.transport.ConfluenceNodeList
+import com.reactor.accio.transport.TransportMessage
 
 class YouTubeGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 
@@ -66,7 +66,7 @@ class YouTubeGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 
 
 // Youtube video class
-class YoutubeVideo(videoNode:JsonNode) {
+class YoutubeVideo(videoNode:JsonNode) extends TransportMessage {
 
 	var id:String = null
 	var title:String = null

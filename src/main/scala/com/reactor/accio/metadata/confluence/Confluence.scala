@@ -2,8 +2,9 @@
  
 import java.util.ArrayList
  import scala.util.Random
+ import com.reactor.accio.transport.TransportMessage
  
-class Confluence() {
+class Confluence() extends TransportMessage {
 
 	 val confluence_matrix = new ArrayList[ArrayList[Any]]()
 		 

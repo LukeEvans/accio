@@ -39,10 +39,6 @@ class AccioPipeline(args:FlowControlArgs) extends FlowControlActor(args) {
       val origin = sender
       process(request, origin)
       complete()
-      
-    case s:String => 
-      println("Got: " + s)
-      complete()
   }
   
   // Process

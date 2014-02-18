@@ -5,12 +5,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import scala.collection.JavaConversions._
 import java.util.ArrayList
 import org.apache.commons.lang.builder.HashCodeBuilder
+import com.reactor.accio.transport.TransportMessage
 
 object Keyword {
   val MAX_CANDIDATES = 3
 }
 
-class Keyword {
+class Keyword extends TransportMessage {
 
 	var original_text:String = null
 	var connection_found:Boolean = false

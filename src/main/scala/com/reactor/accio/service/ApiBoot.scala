@@ -29,7 +29,7 @@ class ApiBoot extends Bootable {
 	println("IP: " + ip)
 	
 	val config = ConfigFactory.parseString(s"akka.remote.netty.tcp.port=2551") 
-      .withFallback(ConfigFactory.parseString("akka.cluster.roles = [accio-frontend]\nakka.remote.netty.tcp.hostname=\""+ip+"\"")).withFallback(ConfigFactory.load("accio"))
+      .withFallback(ConfigFactory.parseString("akka.cluster.roles = [frontend]\nakka.remote.netty.tcp.hostname=\""+ip+"\"")).withFallback(ConfigFactory.load("reactor"))
       
     implicit val system = ActorSystem("Accio-0-1", config)
         
@@ -37,8 +37,6 @@ class ApiBoot extends Bootable {
     Cluster(system) registerOnMemberUp {
 	  
 	      // Easy role change for debugging
-          val worker_role = "accio-frontend"
-          val supervisor_role = "accio-frontend"
           val default_parallelization = 1
 		    
 		// Actor actually handling the requests
@@ -46,7 +44,7 @@ class ApiBoot extends Bootable {
     	  ClusterRouterConfig(AdaptiveLoadBalancingRouter(akka.cluster.routing.MixMetricsSelector), 
     	  ClusterRouterSettings(
     	  totalInstances = 100, maxInstancesPerNode = 1,
-    	  allowLocalRoutees = true, useRole = Some("accio-frontend")))),
+    	  allowLocalRoutees = true, useRole = Some("frontend")))),
     	  name = "serviceRouter")
     		 
        IO(Http) ! Http.Bind(service, interface = "0.0.0.0", port = 8080)
@@ -54,7 +52,7 @@ class ApiBoot extends Bootable {
   
 
      def startup(){
-         val clusterListener = system.actorOf(Props(classOf[Listener], system), name = "clusterListener")
+         val clusterListener = system.actorOf(Props(classOf[Listener], system))
          Cluster(system).subscribe(clusterListener, classOf[ClusterDomainEvent])
     }
 

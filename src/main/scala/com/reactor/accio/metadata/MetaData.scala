@@ -4,8 +4,9 @@ import com.reactor.accio.metadata.connections.ConnectionMatrix
 import java.util.ArrayList
 import com.reactor.accio.metadata.confluence.Confluence
 import scala.collection.JavaConversions._
+import com.reactor.accio.transport.TransportMessage
 
-class MetaData {
+class MetaData extends TransportMessage {
 	var free_text:String = null
 	var keywords:ArrayList[Keyword] = new ArrayList[Keyword]
 	var connection_matrix:ConnectionMatrix = null

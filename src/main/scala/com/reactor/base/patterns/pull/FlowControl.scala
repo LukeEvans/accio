@@ -32,7 +32,7 @@ class FlowControlArgs() extends TransportMessage {
   
 }
 
-case class FlowControlConfig(name:String, actorType:String, parallel:Int=1, role:String="accio-frontend") extends TransportMessage
+case class FlowControlConfig(name:String, actorType:String, parallel:Int=1, role:String="backend") extends TransportMessage
 
 object FlowControlFactory extends {
   def flowControlledActorForContext(context:ActorContext, flowConfig:FlowControlConfig, args:FlowControlArgs = new FlowControlArgs): ActorRef = {

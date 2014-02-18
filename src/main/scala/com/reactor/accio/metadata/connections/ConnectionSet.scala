@@ -3,8 +3,9 @@ package com.reactor.accio.metadata.connections
 import java.util.ArrayList
 import com.fasterxml.jackson.databind.JsonNode
 import scala.collection.JavaConversions._
+import com.reactor.accio.transport.TransportMessage
 
-class ConnectionSet {
+class ConnectionSet extends TransportMessage {
 
 	var source_id:String = null;
 	var target_id:String = null;

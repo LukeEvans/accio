@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import scala.collection.JavaConversions._
 import com.fasterxml.jackson.databind.JsonNode
 import org.apache.commons.lang.builder.HashCodeBuilder
+import com.reactor.accio.transport.TransportMessage
 
-class Candidate {
+class Candidate extends TransportMessage {
 
 	var name:String = null
 	var id:String = null

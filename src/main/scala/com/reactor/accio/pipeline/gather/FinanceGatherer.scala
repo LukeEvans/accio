@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat
 import com.reactor.accio.transport.ConfluenceNodeList
 import com.reactor.accio.transport.StringList
 import java.math.BigDecimal
+import com.reactor.accio.transport.TransportMessage
 
 class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 
@@ -46,7 +47,6 @@ class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 		
 		Tools.fetchURL(url) match {
 			case Some ( response ) =>
-				println("Going ham on node: " + url)
 				response.get("query").get("results").toList map { quoteNode =>
 					val stock = new Stock(quoteNode)
 					confluenceNodes += stock
@@ -57,7 +57,6 @@ class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 		
 		// Reply
 		reply(origin, ConfluenceNodeList(confluenceNodes))
-		println("Replied!!!")
 	}
 
 	// Get list of symbols
@@ -89,7 +88,7 @@ class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 
 
 // Stock
-class Stock(stockNode:JsonNode) {
+class Stock(stockNode:JsonNode) extends TransportMessage {
 	
 	var id:String = null
 	var card_type = "stocks"

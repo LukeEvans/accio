@@ -5,7 +5,6 @@ import com.reactor.base.patterns.pull.FlowControlActor
 import com.reactor.accio.transport.IdList
 import akka.actor.ActorRef
 import scala.collection.mutable.ArrayBuffer
-import com.reactor.accio.metadata.confluence.ConfluenceNode
 import com.reactor.accio.storage.Mongo
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global

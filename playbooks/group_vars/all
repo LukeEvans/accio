@@ -1,11 +1,15 @@
 dist_name:
-  - kingscross-dist
+  - accio-dist
 
 upstart_daemons:
-  - KingsCross
+  - accio-frontend
+  - accio-backend
 
-ec2_hosts:
-  - tag_Name_KingsCross-01
+frontend_upstart_daemons:
+  - accio-frontend
+
+backend_upstart_daemons:
+  - accio-backend
 
 local:
   - localhost

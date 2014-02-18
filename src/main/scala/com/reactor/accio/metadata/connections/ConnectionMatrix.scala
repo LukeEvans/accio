@@ -5,8 +5,9 @@ import java.util.ArrayList
 import com.reactor.accio.metadata.Keyword
 import java.util.ArrayList
 import scala.collection.JavaConversions._
+import com.reactor.accio.transport.TransportMessage
 
-class ConnectionMatrix {
+class ConnectionMatrix extends TransportMessage {
 
 	var connection_sets:ArrayList[ConnectionSet] = new ArrayList[ConnectionSet];
 	

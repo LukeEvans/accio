@@ -1,10 +1,29 @@
-- name: Deploy and run 
+- name: Undeploy and Distribute
   hosts: 
-  - tag_Name_KingsCross-01
+  - tag_Name_Accio-Frontend-01
+  - tag_Name_Accio-Backend-01
   user: ubuntu
   sudo: true
   gather_facts: false
   roles:
       - undeploy
       - distribute
-      - deploy
+
+- name: Run Frontend
+  hosts: 
+  - tag_Name_Accio-Frontend-01
+  user: ubuntu
+  sudo: true
+  gather_facts: false
+  roles:
+      - deploy-frontend
+
+
+- name: Run Backend
+  hosts: 
+  - tag_Name_Accio-Backend-01
+  user: ubuntu
+  sudo: true
+  gather_facts: false
+  roles:
+      - deploy-backend      

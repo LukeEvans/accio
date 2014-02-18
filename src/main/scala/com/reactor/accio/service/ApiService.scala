@@ -45,7 +45,7 @@ class ApiActor() extends Actor with ApiService {
   println("Starting API Service actor...")
   
   // Pipeline
-  val accioPipeline = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="accioPipeline", actorType="com.reactor.accio.pipeline.AccioPipeline"))
+  val accioPipeline = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="accioPipeline", actorType="com.reactor.accio.pipeline.AccioPipeline", role="frontend"))
   
   // Set up throttler
   val dispatcher = actorRefFactory.actorOf(Props(classOf[Dispatcher], accioPipeline), "dispatcher")

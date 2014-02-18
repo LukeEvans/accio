@@ -1,9 +1,10 @@
 package com.reactor.accio.metadata.connections
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.reactor.accio.transport.TransportMessage
 
 // Connection
-class Connection() {
+class Connection() extends TransportMessage {
 
 	var connection_type:String = "connection"
 	
