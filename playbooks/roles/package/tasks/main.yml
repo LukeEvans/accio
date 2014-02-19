@@ -1,7 +1,13 @@
 ---
 
 - name: Pause
-  pause: seconds=60
-  
+  pause: seconds=6
+
+- name: Modify Seed node
+  local_action: lineinfile dest=../src/main/resources/application.conf regexp='^\s*seed-nodes =' line='    seed-nodes = ["akka.tcp://Accio-0-1@{{seed_ip}}:2551"]'
+
+- name: Modify Default Flow Control Config
+  local_action: lineinfile dest=../src/main/scala/com/reactor/base/patterns/pull/FlowControl.scala regexp='^.*class FlowControlConfig' line='case class FlowControlConfig(name:String, actorType:String, parallel:Int={{default_parallel}}, role:String="{{default_role}}") extends TransportMessage'  
+
 - name: Run sbt dist
   local_action: shell cd .. && sbt dist

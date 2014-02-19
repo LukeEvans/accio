@@ -2,7 +2,7 @@
   hosts: local
   connection: local
   user: ubuntu
-  sudo: true
+  sudo: false
   gather_facts: false
   roles:
       - package

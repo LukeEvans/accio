@@ -28,7 +28,6 @@ class MetaData extends TransportMessage {
 	//================================================================================
 	def addKeyword(keyword:Keyword) {
 		if (!keywords.contains(keyword)) {
-			println("Adding keyword")
 			keywords.add(keyword);
 		}
 	}

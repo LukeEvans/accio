@@ -149,22 +149,14 @@ class Keyword extends TransportMessage {
 		return s;
 	}
 	
-	def equals(obj:Keyword): Boolean ={
-		try { 
-			val other = obj.asInstanceOf[Keyword];
-			if (original_text.equalsIgnoreCase(other.original_text)) {
-				return true;
-			}
-			return false;
-			
-		} catch {
-		  	case e:Exception => return false;
-		}
-	}
-	
-    override def hashCode(): Int = {
-        return new HashCodeBuilder(17, 31). // two randomly chosen prime numbers
-            append(original_text).
-            toHashCode();
-    }
+  override def equals(obj:Any) = {
+  obj match {
+    case o: Keyword => 
+    	if (o.original_text.equalsIgnoreCase(this.original_text)) true else false
+    case _ => false
+  }}
+
+  override def hashCode(): Int = {
+    super.hashCode()
+  }
 }

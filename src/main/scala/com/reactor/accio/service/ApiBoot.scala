@@ -36,8 +36,8 @@ class ApiBoot extends Bootable {
     //#registerOnUp
     Cluster(system) registerOnMemberUp {
 	  
-	      // Easy role change for debugging
-          val default_parallelization = 1
+	    // Easy role change for debugging
+        val default_parallelization = 1
 		    
 		// Actor actually handling the requests
    		val service = system.actorOf(Props(classOf[ApiActor]).withRouter(	
