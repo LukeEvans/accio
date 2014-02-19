@@ -3,7 +3,7 @@
 - name: Pause
   pause: seconds=60
   
-- name: Run Frontend Daemon
+- name: Run Backend Daemon
   command: "start {{ item }}"
   with_items:
      - ${backend_upstart_daemons}

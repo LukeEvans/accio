@@ -1,8 +1,9 @@
 package com.reactor.accio.metadata.connections
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.reactor.accio.transport.TransportMessage
 
-class DisplayEdge {
+class DisplayEdge extends TransportMessage {
 
 	var edge:String = null
 	var vertex_id:String = null

@@ -4,9 +4,10 @@ import java.util.ArrayList
 import com.fasterxml.jackson.databind.JsonNode
 import scala.collection.JavaConversions._
 import java.util.ArrayList
+import com.reactor.accio.transport.TransportMessage
 
 // Display Vertex
-class DisplayVertex {
+class DisplayVertex extends TransportMessage {
   
 	var name:String = null
 	var id:String = null
