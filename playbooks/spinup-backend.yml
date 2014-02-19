@@ -1,4 +1,4 @@
-- name: Launch Instances   
+- name: Launch Backend Instances   
   hosts: local 
   connection: local
   user: root
@@ -8,8 +8,7 @@
     keypair: accio
     security_group: Accio
 
-    frontend_instance_name: Accio-Frontend-01
-    backend_instance_name: Accio-Backend-01
+    instance_name: Accio-Backend-01
 
     # Instace types
     instance_type: m1.large
@@ -28,14 +27,8 @@
  
     # Instance
     - name: Launch frontend instances
-      local_action: ec2 keypair={{keypair}} group={{security_group}} instance_type={{instance_type}} image={{image}} wait=true count={{instance_count}} region={{region}} instance_tags='{"Name":"{{frontend_instance_name}}"}'
+      local_action: ec2 keypair={{keypair}} group={{security_group}} instance_type={{instance_type}} image={{image}} wait=true count={{instance_count}} region={{region}} instance_tags='{"Name":"{{instance_name}}"}'
       register: ec2
-      when: type == "frontend"
-
-    - name: Launch backend instances
-      local_action: ec2 keypair={{keypair}} group={{security_group}} instance_type={{instance_type}} image={{image}} wait=true count={{instance_count}} region={{region}} instance_tags='{"Name":"{{backend_instance_name}}"}'
-      register: ec2
-      when: type == "backend"
 
     - name: Add all worker instance public IPs to host group
       local_action: add_host hostname={{item.public_ip}} groupname=launched ansible_ssh_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/.ssh/{{keypair}}.pem
