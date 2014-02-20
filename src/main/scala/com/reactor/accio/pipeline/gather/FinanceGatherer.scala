@@ -47,7 +47,7 @@ class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 		
 		Tools.fetchURL(url) match {
 			case Some ( response ) =>
-				response.get("query").get("results").toList map { quoteNode =>
+				response.get("query").get("results").get("quote").toList map { quoteNode =>
 					val stock = new Stock(quoteNode)
 					confluenceNodes += stock
 				}
@@ -79,10 +79,10 @@ class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 		var url = new String(stockFetchBaseURL + " (")
 		
 		symbols map { s =>
-			url += "\"" + s + "\""
+			url += "\"" + s + "\","
 		}
 		
-		return url + ")"
+		return url.substring(0, url.length() - 1) + ")"
 	}
 }
 
