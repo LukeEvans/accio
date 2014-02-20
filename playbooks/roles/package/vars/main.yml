@@ -1,0 +1,5 @@
+seed_ip: 10.209.143.159
+
+default_role: backend
+
+default_parallel: 2

@@ -19,6 +19,7 @@ import com.reactor.accio.transport.MetadataContainer
 import scala.util.Success
 import scala.util.Failure
 import com.reactor.base.transport._
+import com.reactor.accio.transport.AccioResponse
 
 case class AccioArgs(extractor:ActorRef) extends FlowControlArgs
 
@@ -58,7 +59,7 @@ class AccioPipeline(args:FlowControlArgs) extends FlowControlActor(args) {
 	  
 	  completed onComplete {
 	  	case Success(metadataResponse) =>
-	  		origin ! ResponseContainer(new RESTResponse(metadataResponse.metadata))
+	  		origin ! ResponseContainer(new AccioResponse(req, metadataResponse.metadata))
 	  	case Failure(e) => 
 	  	  log.error("An error has occurred: " + e.getMessage())
 	  }

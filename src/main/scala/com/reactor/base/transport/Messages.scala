@@ -6,8 +6,11 @@ import spray.routing.RequestContext
 
 abstract class RESTRequest(data:Any) extends Serializable
 class RESTResponse(data:Any) extends Serializable {
+	
+	var finalData = data
+	
     def finish(startTime:Long, mapper:ObjectMapper): String = {
-    	return mapper.writeValueAsString(data)
+    	return mapper.writeValueAsString(finalData)
   }
 }
 
