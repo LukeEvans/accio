@@ -169,6 +169,31 @@ object Tools {
 	                }
   		}
         
+        // Fetch Flickr URL
+        def fetchFlickrURL(url:String): Option[JsonNode] = {
+	        try {
+	                var httpClient = new DefaultHttpClient();
+	                httpClient.getParams().setParameter("http.socket.timeout", new Integer(20000));
+	                        var getRequest = new HttpGet(parseUrl(url).toString());
+	                        getRequest.addHeader("accept", "application/json");
+	
+	                        var response = httpClient.execute(getRequest);
+	
+	                        // Return JSON
+	                        var mapper = new ObjectMapper();
+	                        var reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+	                        val results = reader.readLine().replaceAll("""YAHOO.Finance.SymbolSuggest.ssCallback\(""", "")
+	                        return Some ( mapper.readTree( results.replaceAll("""jsonFlickrApi\(""", "").replaceAll("""}\s*\)$""", "}")) )
+	
+	                } catch{
+	                  case e:Exception =>{
+	                        System.out.println("Failure: " + url);
+	                        e.printStackTrace();
+	                        return None;
+	                  }
+	                }
+  		}        
+        
         //================================================================================
         // URL encoding Methods
         //================================================================================

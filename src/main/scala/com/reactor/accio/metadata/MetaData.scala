@@ -168,7 +168,6 @@ class MetaData extends TransportMessage {
 	// Copy
 	//================================================================================
 	def copy(): MetaData = {
-		println("\n\nCopy method not done\n\n")
 		return this
 	}	
 }

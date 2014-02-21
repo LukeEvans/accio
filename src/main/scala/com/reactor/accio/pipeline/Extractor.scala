@@ -37,6 +37,13 @@ class Extractor(args:FlowControlArgs) extends FlowControlActor(args) {
 	  results match {
 	    case Some(results) =>
 		  
+	      // If Alchemy gets no keywords, but we have text. Add it anyway
+	      if (results.path("keywords").toList.size < 1) {
+	    	  if (metaData.free_text != null && metaData.free_text.size > 0) {
+	    	  	metaData.addKeyword(new Keyword(metaData.free_text))
+	    	  }
+	      }
+	      
 	      // Extract keywords from Alchemy
 		  for (r <- results.path("keywords")) {
 		    metaData.addKeyword(new Keyword(r));

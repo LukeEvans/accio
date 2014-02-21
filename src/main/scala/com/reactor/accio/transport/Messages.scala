@@ -86,7 +86,11 @@ class AccioResponse(accioRequest:AccioRequest, metadata:MetaData) extends RESTRe
 	// Confluence
 	def confluence(max:Int) {
 		metadata.confluence.confluence_matrix map { list =>
-			newData += list.take(max)
+			if (list.size > 0) {
+				newData += list.clone
+			}
 		}
+		
+		println(newData)
 	}
 }
