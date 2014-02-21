@@ -9,6 +9,8 @@ import com.reactor.base.transport.RESTResponse
 import com.reactor.accio.metadata.MetaData
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.reactor.accio.metadata.Candidate
+import java.util.ArrayList
+import com.reactor.accio.metadata.Keyword
 
 
 case class MetadataContainer(metadata:MetaData)
@@ -16,6 +18,8 @@ case class CandidateList(candidates:ArrayBuffer[Candidate])
 case class ConfluenceNodeList(confluenceNodes:ArrayBuffer[Any]) 
 case class IdList(ids:ArrayBuffer[String])  
 case class StringList(strings:ArrayBuffer[String])
+case class ConfluenceContainer(metadata:MetaData, request:AccioRequest)
+case class KeywordsContainer(keywords:ArrayList[Keyword], request:AccioRequest)
 
 // Accio Request
 class AccioRequest extends RESTRequest {
@@ -23,7 +27,8 @@ class AccioRequest extends RESTRequest {
 	@transient
 	val mapper = new ObjectMapper()
 	var text:String = null
-	var alt:Boolean = false                                                                                                                                                        
+	var alt:Boolean = false    
+	var facebook_token:String = null
 	
 	//================================================================================
 	// Constructors
@@ -36,6 +41,8 @@ class AccioRequest extends RESTRequest {
 
 	  text = if (reqJson.has("text")) reqJson.path("text").asText() else null
 	  alt = if (reqJson.has("alt")) reqJson.path("alt").asBoolean() else false
+	  facebook_token = if(reqJson.has("facebook_token")) reqJson.path("facebook_token").asText() else null
+	
 	}
 	
 	def this(request:HttpRequest) {
@@ -43,6 +50,7 @@ class AccioRequest extends RESTRequest {
 	  
 	  text = if (request.uri.query.get("text") != None) request.uri.query.get("text").get else null
 	  alt = if (request.uri.query.get("alt") != None) request.uri.query.get("alt").get.asInstanceOf[Boolean] else false
+	  facebook_token = if (request.uri.query.get("facebook_token") != None) request.uri.query.get("facebook_token").get else null
 	  
 	}
 }
