@@ -1,7 +1,5 @@
 package com.reactor.accio.pipeline
 
-import com.reactor.base.patterns.pull.FlowControlActor
-import com.reactor.base.patterns.pull.FlowControlArgs
 import akka.actor.ActorRef
 import com.reactor.accio.transport.MetadataContainer
 import com.reactor.accio.metadata.MetaData
@@ -20,12 +18,18 @@ import scala.util.Success
 import scala.util.Failure
 import scala.collection.JavaConversions._
 import com.fasterxml.jackson.databind.JsonNode
+import akka.util.Timeout
+import akka.pattern.ask
+import scala.concurrent.duration._
+import com.reactor.base.patterns.pull._
+import scala.concurrent.Await
 
 // Extractor actor
 class Describer(args:FlowControlArgs) extends FlowControlActor(args) {
 	
 	// Graph database
 	val graphdb = new GraphDB()
+	val flickerFetcher = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="flickerFetcher", actorType="com.reactor.accio.pipeline.gather.FlickrGatherer"))
 	
 	// Ready
 	ready()
@@ -60,16 +64,31 @@ class Describer(args:FlowControlArgs) extends FlowControlActor(args) {
 	
 	// Fetch
 	def fetch(candidate:Candidate): Option[Candidate] = {
+	  implicit val timeout = Timeout(10 seconds)
+	  
+	  val imageOptionFuture = (flickerFetcher ? candidate.name).mapTo[Option[String]]
+	  val imageOption = Await.result(imageOptionFuture, timeout.duration)
+	  
 	  val results: Option[JsonNode] = graphdb.findVertexDetails(candidate.mid)
-	 
+	  
 	  results match {
 	    case Some(details) => 
-	      candidate.grabVertexMetaData(details);
-	      return Some( candidate )
+	      candidate.grabVertexMetaData(details)
+	  		imageOption match {
+	  			case Some(url) => 
+	  				candidate.images.add(url)
+	  				return Some ( candidate )
+	  			case None => 
+	  				println("no image for: " + candidate.name)
+	  				
+	  			return Some ( candidate )
+	  		}	      
 	      
 	    case None =>
 	    	println("None")
-	    	return None
+	    	
+	    	return Some ( candidate )
 	  }
+	  
 	}
 }

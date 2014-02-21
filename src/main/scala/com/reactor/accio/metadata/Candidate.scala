@@ -40,7 +40,6 @@ class Candidate extends TransportMessage {
 			candidate_type = "Wikipedia";
 			icon = "https://s3.amazonaws.com/Channel_Icons/Wikipedia-logo-v2.png";
 			images = new ArrayList[String]
-			images.add("https://usercontent.googleapis.com/freebase/v1/image" + id +  "?maxwidth=960");
 
 		} catch {
 		  	case e:Exception => e.printStackTrace();
