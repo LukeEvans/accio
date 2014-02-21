@@ -20,6 +20,7 @@ import scala.util.Success
 import scala.util.Failure
 import com.reactor.base.transport._
 import com.reactor.accio.transport.AccioResponse
+import com.reactor.accio.transport.ConfluenceContainer
 
 case class AccioArgs(extractor:ActorRef) extends FlowControlArgs
 
@@ -54,7 +55,7 @@ class AccioPipeline(args:FlowControlArgs) extends FlowControlActor(args) {
 	    disambiguated <- (disambig ? extracted).mapTo[MetadataContainer]
 	    connected <- (connector ? disambiguated).mapTo[MetadataContainer]
 	    described <- (describer ? connected).mapTo[MetadataContainer]
-	    confluenced <- (confluence ? described).mapTo[MetadataContainer]
+	    confluenced <- (confluence ? ConfluenceContainer(described.metadata, req)).mapTo[MetadataContainer]
 	  } yield confluenced
 	  
 	  completed onComplete {

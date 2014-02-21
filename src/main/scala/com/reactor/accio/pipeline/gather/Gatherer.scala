@@ -26,6 +26,9 @@ import com.reactor.base.patterns.pull.FlowControlConfig
 import com.reactor.accio.transport.MetadataContainer
 import com.reactor.accio.transport.StringList
 import java.util.ArrayList
+import com.reactor.accio.transport.ConfluenceContainer
+import com.reactor.accio.transport.AccioRequest
+import com.reactor.accio.transport.KeywordsContainer
 
 // Gather Types
 trait GatherType
@@ -44,6 +47,7 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	val twitterGatherer:ActorRef = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="twitterGatherer", actorType="com.reactor.accio.pipeline.gather.TwitterGatherer"))
 	val youtubeGatherer:ActorRef = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="youtubeGatherer", actorType="com.reactor.accio.pipeline.gather.YouTubeGatherer"))
 	val stocksGatherer:ActorRef = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="stockGatherer", actorType="com.reactor.accio.pipeline.gather.FinanceGatherer"))
+	val facebookGatherer:ActorRef = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="facebookGatherer", actorType="com.reactor.accio.pipeline.gather.FacebookGatherer"))
 	
 	val news_list = ArrayBuffer[String]()
 	val twitter_list = ArrayBuffer[String]()
@@ -55,12 +59,16 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	def receive = {
 	  case MetadataContainer(metaData) =>
 	    val origin = sender
-	    process(metaData.copy, origin)
+	    process(metaData.copy, null, origin)
+	    complete()
+	  case ConfluenceContainer(metaData, request) =>
+	    val origin = sender
+	    process(metaData.copy, request, origin)
 	    complete()
 	}
 	
 	// Process
-	def process(metaData:MetaData, origin:ActorRef) {
+	def process(metaData:MetaData, request:AccioRequest, origin:ActorRef) {
 	  implicit val timeout = Timeout(10 seconds)
 	  
 		// Sort candidates by the types of things that need fetched
@@ -93,6 +101,7 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	  	if (!twitter_list.isEmpty) futures += (twitterGatherer ? IdList(twitter_list.clone)).mapTo[ConfluenceNodeList] 
 	  	if (metaData.free_text != null) futures += (youtubeGatherer ? metaData.free_text).mapTo[ConfluenceNodeList]
 	  	if (!stocks_list.isEmpty) futures += (stocksGatherer ? StringList(stocks_list.clone)).mapTo[ConfluenceNodeList]
+	  	if(request.facebook_token != null) futures += (facebookGatherer ? KeywordsContainer(metaData.keywords, request)).mapTo[ConfluenceNodeList]
 	  			
 	  	// Clear lists to start fresh on next call
 	  	news_list.clear
