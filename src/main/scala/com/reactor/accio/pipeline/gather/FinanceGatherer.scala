@@ -47,9 +47,16 @@ class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 		
 		Tools.fetchURL(url) match {
 			case Some ( response ) =>
-				response.get("query").get("results").get("quote").toList map { quoteNode =>
-					val stock = new Stock(quoteNode)
-					confluenceNodes += stock
+				
+				val quoteNode = response.get("query").get("results").get("quote")
+				if (quoteNode.isArray()) {
+					quoteNode.toList map { quoteNode =>
+						confluenceNodes += new Stock(quoteNode)
+					}
+				}
+				
+				else {
+					confluenceNodes += new Stock(quoteNode) 
 				}
 				
 			case None =>

@@ -89,10 +89,10 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	  	val futures = ArrayBuffer[Future[ConfluenceNodeList]]()
 	  	
 	  	// Start fetching everything
-	  	futures += (newsGatherer ? IdList(news_list.clone)).mapTo[ConfluenceNodeList]
-	  	futures += (twitterGatherer ? IdList(twitter_list.clone)).mapTo[ConfluenceNodeList] 
-	  	futures += (youtubeGatherer ? metaData.free_text).mapTo[ConfluenceNodeList]
-	  	futures += (stocksGatherer ? StringList(stocks_list.clone)).mapTo[ConfluenceNodeList]
+	  	if (!news_list.isEmpty) futures += (newsGatherer ? IdList(news_list.clone)).mapTo[ConfluenceNodeList]
+	  	if (!twitter_list.isEmpty) futures += (twitterGatherer ? IdList(twitter_list.clone)).mapTo[ConfluenceNodeList] 
+	  	if (metaData.free_text != null) futures += (youtubeGatherer ? metaData.free_text).mapTo[ConfluenceNodeList]
+	  	if (!stocks_list.isEmpty) futures += (stocksGatherer ? StringList(stocks_list.clone)).mapTo[ConfluenceNodeList]
 	  			
 	  	// Clear lists to start fresh on next call
 	  	news_list.clear
