@@ -29,12 +29,16 @@ import java.util.ArrayList
 import com.reactor.accio.transport.ConfluenceContainer
 import com.reactor.accio.transport.AccioRequest
 import com.reactor.accio.transport.KeywordsContainer
+import com.reactor.accio.transport.KeywordContainer
 
 // Gather Types
 trait GatherType
 case class General() extends GatherType
 case class Business() extends GatherType
 case class Film() extends GatherType
+case class Music() extends GatherType
+case class ActorOrDirector() extends GatherType
+case class TV() extends GatherType
 
 // Extractor actor
 class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
@@ -48,10 +52,13 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	val youtubeGatherer:ActorRef = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="youtubeGatherer", actorType="com.reactor.accio.pipeline.gather.YouTubeGatherer"))
 	val stocksGatherer:ActorRef = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="stockGatherer", actorType="com.reactor.accio.pipeline.gather.FinanceGatherer"))
 	val facebookGatherer:ActorRef = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="facebookGatherer", actorType="com.reactor.accio.pipeline.gather.FacebookGatherer"))
+	val flickrGatherer:ActorRef = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="flickrGatherer", actorType="com.reactor.accio.pipeline.gather.FlickrGatherer"))
+	val itunesGatherer:ActorRef = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="itunesGatherer", actorType="com.reactor.accio.pipeline.gather.ItunesGatherer"))
 	
 	val news_list = ArrayBuffer[String]()
 	val twitter_list = ArrayBuffer[String]()
 	val stocks_list = ArrayBuffer[String]()
+	val itunes_list = ArrayBuffer[String]()
 	
 	// Ready
 	ready()
@@ -101,12 +108,15 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	  	if (!twitter_list.isEmpty) futures += (twitterGatherer ? IdList(twitter_list.clone)).mapTo[ConfluenceNodeList] 
 	  	if (metaData.free_text != null) futures += (youtubeGatherer ? metaData.free_text).mapTo[ConfluenceNodeList]
 	  	if (!stocks_list.isEmpty) futures += (stocksGatherer ? StringList(stocks_list.clone)).mapTo[ConfluenceNodeList]
-	  	if(request.facebook_token != null) futures += (facebookGatherer ? KeywordsContainer(metaData.keywords, request)).mapTo[ConfluenceNodeList]
+	  	if (request.facebook_token != null) futures += (facebookGatherer ? KeywordsContainer(metaData.keywords, request)).mapTo[ConfluenceNodeList]
+	  	if (!metaData.keywords.isEmpty()) futures += (flickrGatherer ? KeywordContainer(metaData.keywords.get(0))).mapTo[ConfluenceNodeList]
+	  	if (!itunes_list.isEmpty()) futures += (itunesGatherer ? itunes_list.get(0)).mapTo[ConfluenceNodeList]
 	  			
 	  	// Clear lists to start fresh on next call
 	  	news_list.clear
 	  	twitter_list.clear
 	  	stocks_list.clear
+	  	itunes_list.clear
 	  	
 		Future.sequence(futures) onComplete {
 	  		case Success(completed) => 
@@ -122,14 +132,30 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	}
 	
 	// Define the gather type of a candidate
-	def defineGatherType(candiate:Candidate): Option[GatherType] = {
+	def defineGatherType(candidate:Candidate): Option[GatherType] = {
+		val types = candidate.types
 	
-		if (candiate.types.contains("ns:business.issuer")) {
+		if (types.contains("ns:business.issuer")) {
 			return Some (Business())
 		}
 		
-		if (candiate.types.contains("ns:film.film")) {
+		if (types.contains("ns:film.film")) {
 			return Some (Film())
+		}
+		
+		if(types.contains("ns:music.artist")
+		    || types.contains("ns:music.composition")){
+		  return Some(Music())
+		}
+		
+		if(types.contains("ns:film.director") 
+		    || types.contains("ns:film.actor")){
+		  return Some(ActorOrDirector())
+		}
+		
+		if(types.contains("ns:tv.tv_program")
+		    || types.contains("ns:tv.tv_director")){  
+		  return Some(TV())
 		}
 		
 		else {
@@ -140,12 +166,20 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	}
 	
 	// Separate candidates bases on their gather type
-	def sortCandidate(candiate:Candidate) {
-		defineGatherType(candiate) match {
+	def sortCandidate(candidate:Candidate) {
+		defineGatherType(candidate) match {
 			case Some(gatherType) => 
 				gatherType match {
-					case t:Business =>
-						stocks_list += candiate.name
+					case _:Business => 
+					  stocks_list += candidate.name
+					case _:Film => 
+					  itunes_list += candidate.name
+					case _:TV =>
+					  itunes_list += candidate.name
+					case _:Music =>
+					  itunes_list += candidate.name
+					case _:ActorOrDirector =>
+					  itunes_list += candidate.name
 					case _ => 
 			}
 				

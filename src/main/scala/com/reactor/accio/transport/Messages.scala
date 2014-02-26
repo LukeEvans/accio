@@ -19,6 +19,7 @@ case class ConfluenceNodeList(confluenceNodes:ArrayBuffer[Any])
 case class IdList(ids:ArrayBuffer[String])  
 case class StringList(strings:ArrayBuffer[String])
 case class ConfluenceContainer(metadata:MetaData, request:AccioRequest)
+case class KeywordContainer(keyword:Keyword)
 case class KeywordsContainer(keywords:ArrayList[Keyword], request:AccioRequest)
 
 // Accio Request
