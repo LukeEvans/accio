@@ -17,7 +17,7 @@ class Candidate extends TransportMessage {
 	var wikipedia_title:String = null
 	var wikipedia_description:String = null
 	var mid:String = null
-	var candidate_type:String = null
+	var story_type:String = "wikipedia"
 	var images:ArrayList[String] = new ArrayList[String]
 	var icon:String = null
 
@@ -37,7 +37,6 @@ class Candidate extends TransportMessage {
 			translateMid();
 			
 			// Set static fields
-			candidate_type = "Wikipedia";
 			icon = "https://s3.amazonaws.com/Channel_Icons/Wikipedia-logo-v2.png";
 			images = new ArrayList[String]
 

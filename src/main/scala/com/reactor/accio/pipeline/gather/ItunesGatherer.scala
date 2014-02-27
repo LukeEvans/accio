@@ -21,7 +21,7 @@ class ItunesGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
     case a:Any => println(a)
   }
   
-  def processQuery(query:String, origin:ActorRef){
+  def processQuery(query:String, origin:ActorRef) {
     Tools.fetchURL(baseUrl
     		+ "term=" + query
     		+ "&limit=" + 5) match{

@@ -76,7 +76,7 @@ class YoutubeVideo(videoNode:JsonNode) extends TransportMessage {
 	var thumbnail:String = null
 	var date:Date = null
 	var image_url = "https://s3.amazonaws.com/Channel_Icons/youtube_icon.png";
-	var confluence_type = "youtube"
+	var story_type = "youtube"
 	var view_count = 0
 	var likes = 0
 	var dislikes = 0	

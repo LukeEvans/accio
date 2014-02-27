@@ -98,7 +98,7 @@ class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 class Stock(stockNode:JsonNode) extends TransportMessage {
 	
 	var id:String = null
-	var card_type = "stocks"
+	var story_type = "stocks"
 	var icon = "https://s3.amazonaws.com/Twitter_Source_Images/Winston-Twitter-Images/Stocks_icon.png"
 	var source = "Yahoo Finance"
 	var company:String = null

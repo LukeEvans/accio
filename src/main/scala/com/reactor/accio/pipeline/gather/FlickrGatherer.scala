@@ -112,6 +112,6 @@ class FlickrPhoto(photoNode:JsonNode) extends TransportMessage {
 	val secret = if (photoNode.has("secret")) photoNode.get("secret").asText() else null
 	val server = if (photoNode.has("server")) photoNode.get("server").asText() else null
 	val farm = if (photoNode.has("farm")) photoNode.get("farm").asText() else null
-	
+	val story_type = "flickr"
 	val url = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + ".jpg"
 }

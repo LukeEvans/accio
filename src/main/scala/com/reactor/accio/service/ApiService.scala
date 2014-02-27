@@ -100,7 +100,7 @@ trait ApiService extends HttpService {
   implicit val throttler:ActorRef
 
   
-    // Mapper        
+  // Mapper        
   val mapper = new ObjectMapper() with ScalaObjectMapper
       mapper.registerModule(DefaultScalaModule)
       mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
