@@ -1,0 +1,9 @@
+- name: Undeploy and Distribute
+  hosts: 
+  - tag_Name_Accio-Frontend-01
+  - tag_Name_Accio-Backend-01
+  user: ubuntu
+  sudo: true
+  gather_facts: false
+  roles:
+      - datadog
