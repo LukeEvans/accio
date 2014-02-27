@@ -13,7 +13,8 @@ class Confluence() extends TransportMessage {
 
 	 val confluence_matrix = ArrayBuffer[ArrayBuffer[Any]]()
 
-     // Mapper        
+     // Mapper    
+	 @transient
      val mapper = new ObjectMapper() with ScalaObjectMapper
       	mapper.registerModule(DefaultScalaModule)
       	mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
