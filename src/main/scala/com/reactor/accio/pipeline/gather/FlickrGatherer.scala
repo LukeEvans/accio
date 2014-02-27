@@ -20,6 +20,8 @@ import scala.collection.JavaConversions._
 import java.text.SimpleDateFormat
 import com.reactor.accio.transport.ConfluenceNodeList
 import com.reactor.accio.transport.TransportMessage
+import com.reactor.accio.transport.KeywordContainer
+import com.reactor.accio.metadata.Keyword
 
 class FlickrGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 
@@ -35,6 +37,9 @@ class FlickrGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 			val origin = sender
 			processQuery(origin, query)
 			complete()
+		case KeywordContainer(keyword) =>
+		  processKeyword(keyword, sender)
+		  complete()
 	}	
 
 	// Process
@@ -61,8 +66,42 @@ class FlickrGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 		// Reply
 		reply(origin, None)
 	}
+	
+	def processKeyword(keyword:Keyword, origin:ActorRef){
+		val response = Tools.fetchFlickrURL(baseDataUrl
+				+ "&api_key=" + apiKey 
+				+ "&text=" + keyword.candidates.get(0).name
+				+ "&per_page=" + 5)	
 
+		response match {
+			case Some ( responseNode ) =>
+			
+				try {
+					val data = extractData(responseNode.get("photos").get("photo"))
+					
+					reply(origin, ConfluenceNodeList(data))
+					return
+				}
+				
+			case None =>
+		}
+		
+		// Reply
+		reply(origin, ConfluenceNodeList(ArrayBuffer[Any]()))
+	}
+	
+  def extractData(dataNode:JsonNode):ArrayBuffer[Any] = {
+    if(dataNode == null)
+      null
+      
+    val data = new ArrayBuffer[Any]
+    for(node <- dataNode)
+      data.add(new FlickrPhoto(node))
+      
+    data
+  }
 }
+
 
 
 // Youtube video class
