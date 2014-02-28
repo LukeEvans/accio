@@ -26,7 +26,7 @@ import com.reactor.accio.metadata.Keyword
 class FlickrGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 
 	val baseDataUrl = "http://api.flickr.com/services/rest/?&method=flickr.photos.search&format=json&sort=relevance"
-			val apiKey = "ee914fcffa514b5081adc20bef2f6186"	
+	val apiKey = "ee914fcffa514b5081adc20bef2f6186"	
 	val maxPhotos = 5
 
 	// Ready
@@ -114,4 +114,31 @@ class FlickrPhoto(photoNode:JsonNode) extends TransportMessage {
 	val farm = if (photoNode.has("farm")) photoNode.get("farm").asText() else null
 	val story_type = "flickr"
 	val url = "http://farm" + farm + ".staticflickr.com/" + server + "/" + id + "_" + secret + ".jpg"
+}
+
+// Class to directly fetch Flickr
+class FlickrFetcher {
+	val baseDataUrl = "http://api.flickr.com/services/rest/?&method=flickr.photos.search&format=json&sort=relevance"
+	val apiKey = "ee914fcffa514b5081adc20bef2f6186"		
+		
+	// Process Query
+	def processQuery(query:String): Option[String] = {
+
+		val response = Tools.fetchFlickrURL(baseDataUrl
+				+ "&api_key=" + apiKey 
+				+ "&text=" + query)	
+
+		response match {
+			case Some ( responseNode ) =>
+			
+				try {
+					val photoNode = responseNode.get("photos").get("photo").get(0)
+					val photo = new FlickrPhoto(photoNode)
+					
+					return Some (photo.url)
+				}
+				
+			case None => return None
+		}
+	}		
 }

@@ -23,13 +23,13 @@ import akka.pattern.ask
 import scala.concurrent.duration._
 import com.reactor.base.patterns.pull._
 import scala.concurrent.Await
+import com.reactor.accio.pipeline.gather.FlickrFetcher
 
 // Extractor actor
 class Describer(args:FlowControlArgs) extends FlowControlActor(args) {
 	
 	// Graph database
 	val graphdb = new GraphDB()
-	val flickerFetcher = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="flickerFetcher", actorType="com.reactor.accio.pipeline.gather.FlickrGatherer"))
 	
 	// Ready
 	ready()
@@ -64,11 +64,8 @@ class Describer(args:FlowControlArgs) extends FlowControlActor(args) {
 	
 	// Fetch
 	def fetch(candidate:Candidate): Option[Candidate] = {
-	  implicit val timeout = Timeout(10 seconds)
-	  
-	  val imageOptionFuture = (flickerFetcher ? candidate.name).mapTo[Option[String]]
-	  val imageOption = Await.result(imageOptionFuture, timeout.duration)
-	  
+	  val flickrFetcher = new FlickrFetcher()
+	  val imageOption = flickrFetcher.processQuery(candidate.name)
 	  val results: Option[JsonNode] = graphdb.findVertexDetails(candidate.mid)
 	  
 	  results match {
@@ -92,4 +89,5 @@ class Describer(args:FlowControlArgs) extends FlowControlActor(args) {
 	  
 	}
 	
+	def fake(): Option[String] = { Some ("I_Hate_This.jpg")}
 }
