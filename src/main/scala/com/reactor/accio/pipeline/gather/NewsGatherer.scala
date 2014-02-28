@@ -17,6 +17,7 @@ class NewsGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 	
 	// Mongo
 	val mongo = new Mongo()
+	val maxNews = 8
 	
 	// Ready
 	ready()
@@ -49,11 +50,12 @@ class NewsGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 	  				}
 	  			}
 	  			
+	  			reply(origin, ConfluenceNodeList(confluenceNodes.take(maxNews)))
+	  			
 	  		case Failure(e) => 
 	  			log.error("An error has occurred: " + e.getMessage())
+	  			reply(origin, ConfluenceNodeList(new ArrayBuffer[Any]()))
 		}			
-		
-		reply(origin, ConfluenceNodeList(confluenceNodes))
 	}
 	
 	// Fetch 

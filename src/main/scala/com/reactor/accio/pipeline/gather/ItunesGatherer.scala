@@ -12,6 +12,8 @@ import com.reactor.accio.transport.ConfluenceNodeList
 class ItunesGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
   val baseUrl = "https://itunes.apple.com/search?"
     
+  val maxItunes = 3
+  
   ready()
   
   def receive ={
@@ -28,7 +30,7 @@ class ItunesGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
       case Some(response) =>
         if(response.has("results")){
           val data = extractData(response.get("results"))
-          reply(origin, ConfluenceNodeList(data))
+          reply(origin, ConfluenceNodeList(data.take(maxItunes)))
           return
         }
       case None =>

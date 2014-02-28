@@ -18,6 +18,7 @@ class TwitterGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 	
 	// Elasticsearch
 	val elasticsearch = new Elasticsearch()
+	val maxTweets = 8
 	
 	// Ready
 	ready()
@@ -50,11 +51,12 @@ class TwitterGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 	  				}
 	  			}
 	  			
+	  			reply(origin, ConfluenceNodeList(confluenceNodes.take(maxTweets)))
+	  			
 	  		case Failure(e) => 
 	  			log.error("An error has occurred: " + e.getMessage())
+	  			reply(origin, ConfluenceNodeList(new ArrayBuffer[Any]()))
 		}			
-		
-		reply(origin, ConfluenceNodeList(confluenceNodes))
 	}
 	
 	// Fetch 

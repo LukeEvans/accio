@@ -27,7 +27,7 @@ class FlickrGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 
 	val baseDataUrl = "http://api.flickr.com/services/rest/?&method=flickr.photos.search&format=json&sort=relevance"
 			val apiKey = "ee914fcffa514b5081adc20bef2f6186"	
-			val maxVideos = 3
+	val maxPhotos = 5
 
 	// Ready
 	ready()
@@ -79,7 +79,7 @@ class FlickrGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 				try {
 					val data = extractData(responseNode.get("photos").get("photo"))
 					
-					reply(origin, ConfluenceNodeList(data))
+					reply(origin, ConfluenceNodeList(data.take(maxPhotos)))
 					return
 				}
 				

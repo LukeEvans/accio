@@ -25,7 +25,8 @@ class YouTubeGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 
 	val baseDataUrl = "https://www.googleapis.com/youtube/v3/"
 			val apiKey = "AIzaSyDEv9_zQNRGpw789wTE5NbnUn4IywHUR5U"	
-			val maxVideos = 3
+	
+	val maxVideos = 3
 
 	// Ready
 	ready()
@@ -59,7 +60,7 @@ class YouTubeGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 		}
 		
 		// Reply
-		reply(origin, ConfluenceNodeList(confluenceNodes))
+		reply(origin, ConfluenceNodeList(confluenceNodes.take(maxVideos)))
 	}
 
 }
