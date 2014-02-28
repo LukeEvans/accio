@@ -91,7 +91,5 @@ class AccioResponse(accioRequest:AccioRequest, metadata:MetaData) extends RESTRe
 				newData += list.clone
 			}
 		}
-		
-		println(newData)
 	}
 }

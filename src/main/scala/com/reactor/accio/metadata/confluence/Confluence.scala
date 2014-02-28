@@ -15,7 +15,7 @@ class Confluence() extends TransportMessage {
 
      // Mapper    
 	 @transient
-     val mapper = new ObjectMapper() with ScalaObjectMapper
+     var mapper = new ObjectMapper() with ScalaObjectMapper
       	mapper.registerModule(DefaultScalaModule)
       	mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
       
@@ -30,6 +30,14 @@ class Confluence() extends TransportMessage {
 	 
 	 // Translate Confluence Node
 	 def translateConfluenceNode(node:Any): HashMap[String, Any] = {
+		 
+		 // Re init mapper if it's null
+		 if (mapper == null) {
+			      mapper = new ObjectMapper() with ScalaObjectMapper
+			        mapper.registerModule(DefaultScalaModule)
+			        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+		 }
+		 
 		 val json = mapper.writeValueAsString(node)
 		 val mapObj = mapper.readValue(json, classOf[HashMap[String, Any]])
 		 
@@ -44,8 +52,8 @@ class Confluence() extends TransportMessage {
 			 
 			 t match {
 				 case "News" => mapObj.put("story_type", "news")
-				 case _ => 
-					 mapObj.put("story_type", t)
+				 case string:String => 
+					 mapObj.put("story_type", string.toLowerCase())
 					 mapObj.remove("type")
 			 }
 		 }
