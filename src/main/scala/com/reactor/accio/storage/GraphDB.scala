@@ -11,8 +11,8 @@ import java.util.ArrayList
 // GraphDB Master
 class GraphDB {
   
-//	val rexster = RexsterClientFactory.open("ec2-54-211-25-154.compute-1.amazonaws.com");
-	val rexster = RexsterClientFactory.open("10.170.43.190");
+	val rexster = RexsterClientFactory.open("ec2-54-211-25-154.compute-1.amazonaws.com");
+//	val rexster = RexsterClientFactory.open("10.170.43.190");
 			
 //	val rexster:RexsterClient = RexsterClientFactory.open("ec2-54-221-10-7.compute-1.amazonaws.com");
   	val mapper = new ObjectMapper()

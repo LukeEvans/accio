@@ -56,7 +56,7 @@ class AccioPipeline(args:FlowControlArgs) extends FlowControlActor(args) {
 	    connected <- (connector ? disambiguated).mapTo[MetadataContainer]
 	    described <- (describer ? connected).mapTo[MetadataContainer]
 	    confluenced <- (confluence ? ConfluenceContainer(described.metadata, req)).mapTo[MetadataContainer]
-	  } yield confluenced
+	  } yield confluenced	
 	  
 	  completed onComplete {
 	  	case Success(metadataResponse) =>
