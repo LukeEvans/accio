@@ -41,29 +41,38 @@ class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 	// Process
 	def process(origin:ActorRef, companies:ArrayBuffer[String]) {
 		val confluenceNodes = ArrayBuffer[Any]()
-
+		
 		// Get url
 		val url = buildURL(getSymbols(companies))
-		
-		Tools.fetchURL(url) match {
-			case Some ( response ) =>
-				
-				val quoteNode = response.get("query").get("results").get("quote")
-				if (quoteNode.isArray()) {
-					quoteNode.toList map { quoteNode =>
-						confluenceNodes += new Stock(quoteNode)
+			
+		try {
+			
+			Tools.fetchURL(url) match {
+				case Some ( response ) =>
+					
+					val quoteNode = response.get("query").get("results").get("quote")
+					if (quoteNode.isArray()) {
+						quoteNode.toList map { quoteNode =>
+							confluenceNodes += new Stock(quoteNode)
+						}
 					}
-				}
-				
-				else {
-					confluenceNodes += new Stock(quoteNode) 
-				}
-				
-			case None =>
+					
+					else {
+						confluenceNodes += new Stock(quoteNode) 
+					}
+					
+				case None =>
+			}
+			
+			// Reply
+			reply(origin, ConfluenceNodeList(confluenceNodes))
+		
+		} catch {
+			case e:Exception =>
+				log.error("Fetching stock quote failed from URL: " + url)
+				reply(origin, ConfluenceNodeList(confluenceNodes))
 		}
 		
-		// Reply
-		reply(origin, ConfluenceNodeList(confluenceNodes))
 	}
 
 	// Get list of symbols

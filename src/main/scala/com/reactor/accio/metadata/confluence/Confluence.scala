@@ -23,13 +23,18 @@ class Confluence() extends TransportMessage {
 	 def addConfluenceNodes(confluenceNodes:ArrayList[Any]) {
 		 val confluenceNodeBuffer = ArrayBuffer[Any]()
 		 
-		 confluenceNodes map { n => confluenceNodeBuffer += translateConfluenceNode(n) }
+		 confluenceNodes map { n =>
+			 translateConfluenceNode(n) match {
+				 case Some (translatedNode) => confluenceNodeBuffer += translatedNode
+				 case None =>
+			 }
+		 }
 		 
 		 confluence_matrix += confluenceNodeBuffer
 	 }
 	 
 	 // Translate Confluence Node
-	 def translateConfluenceNode(node:Any): HashMap[String, Any] = {
+	 def translateConfluenceNode(node:Any): Option[HashMap[String, Any]] = {
 		 
 		 // Re init mapper if it's null
 		 if (mapper == null) {
@@ -43,7 +48,7 @@ class Confluence() extends TransportMessage {
 		 
 		 // If we're dealing with updated news
 		 if (mapObj.containsKey("story_type")) {
-			 return mapObj
+			 return Some (mapObj)
 		 }
 
 		 // Change "type" fields to "story_type"
@@ -58,6 +63,6 @@ class Confluence() extends TransportMessage {
 			 }
 		 }
 		 
-		 return mapObj
+		 return Some (mapObj)
 	 }
 }
