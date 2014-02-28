@@ -64,22 +64,23 @@ class Describer(args:FlowControlArgs) extends FlowControlActor(args) {
 	
 	// Fetch
 	def fetch(candidate:Candidate): Option[Candidate] = {
-	  val flickrFetcher = new FlickrFetcher()
-	  val imageOption = flickrFetcher.processQuery(candidate.name)
+//	  val flickrFetcher = new FlickrFetcher()
+//	  val imageOption = flickrFetcher.processQuery(candidate.name)
 	  val results: Option[JsonNode] = graphdb.findVertexDetails(candidate.mid)
 	  
 	  results match {
 	    case Some(details) => 
 	      candidate.grabVertexMetaData(details)
-	  		imageOption match {
-	  			case Some(url) => 
-	  				candidate.images.add(url)
-	  				return Some ( candidate )
-	  			case None => 
-	  				println("no image for: " + candidate.name)
-	  				
-	  			return Some ( candidate )
-	  		}	      
+	      return Some (candidate)
+//	  		imageOption match {
+//	  			case Some(url) => 
+//	  				candidate.images.add(url)
+//	  				return Some ( candidate )
+//	  			case None => 
+//	  				println("no image for: " + candidate.name)
+//	  				
+//	  			return Some ( candidate )
+//	  		}	      
 	      
 	    case None =>
 	    	println("None")
@@ -88,6 +89,4 @@ class Describer(args:FlowControlArgs) extends FlowControlActor(args) {
 	  }
 	  
 	}
-	
-	def fake(): Option[String] = { Some ("I_Hate_This.jpg")}
 }
