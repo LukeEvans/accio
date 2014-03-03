@@ -104,10 +104,10 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	  	val futures = ArrayBuffer[Future[ConfluenceNodeList]]()
 	  	
 	  	// Start fetching everything
+	  	if (!stocks_list.isEmpty) futures += (stocksGatherer ? StringList(stocks_list.clone)).mapTo[ConfluenceNodeList]
 	  	if (!news_list.isEmpty) futures += (newsGatherer ? IdList(news_list.clone)).mapTo[ConfluenceNodeList]
 	  	if (!twitter_list.isEmpty) futures += (twitterGatherer ? IdList(twitter_list.clone)).mapTo[ConfluenceNodeList] 
 	  	if (metaData.free_text != null) futures += (youtubeGatherer ? metaData.free_text).mapTo[ConfluenceNodeList]
-	  	if (!stocks_list.isEmpty) futures += (stocksGatherer ? StringList(stocks_list.clone)).mapTo[ConfluenceNodeList]
 	  	if (request.facebook_token != null) futures += (facebookGatherer ? KeywordsContainer(metaData.keywords, request)).mapTo[ConfluenceNodeList]
 	  	if (!metaData.keywords.isEmpty()) futures += (flickrGatherer ? KeywordContainer(metaData.keywords.get(0))).mapTo[ConfluenceNodeList]
 	  	if (!itunes_list.isEmpty()) futures += (itunesGatherer ? itunes_list.get(0)).mapTo[ConfluenceNodeList]
