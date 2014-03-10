@@ -50,7 +50,23 @@ class AccioRequest extends RESTRequest {
 	  this()
 	  
 	  text = if (request.uri.query.get("text") != None) request.uri.query.get("text").get else null
-	  alt = if (request.uri.query.get("alt") != None) request.uri.query.get("alt").get.asInstanceOf[Boolean] else false
+	  
+	  try {
+	  	alt = if (request.uri.query.get("alt") != None) request.uri.query.get("alt").get.asInstanceOf[Boolean] else false
+	  } 
+	  
+	  catch {
+	  	case e:ClassCastException =>
+	  		val s = request.uri.query.get("alt").get.asInstanceOf[String]
+	  		if (s.equalsIgnoreCase("true")) {
+	  			alt = true
+	  		}
+	  		
+	  		else {
+	  			alt = false
+	  		}
+	  }
+	  
 	  facebook_token = if (request.uri.query.get("facebook_token") != None) request.uri.query.get("facebook_token").get else null
 	  
 	}
