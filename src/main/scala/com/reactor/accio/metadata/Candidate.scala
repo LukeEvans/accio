@@ -6,6 +6,7 @@ import scala.collection.JavaConversions._
 import com.fasterxml.jackson.databind.JsonNode
 import org.apache.commons.lang.builder.HashCodeBuilder
 import com.reactor.accio.transport.TransportMessage
+import scala.collection.mutable.ArrayBuffer
 
 class Candidate extends TransportMessage {
 
@@ -19,6 +20,8 @@ class Candidate extends TransportMessage {
 	var mid:String = null
 	var story_type:String = "wikipedia"
 	var images:ArrayList[String] = new ArrayList[String]
+	var primary_images:ArrayBuffer[String] = new ArrayBuffer[String]
+	var secondary_images:ArrayBuffer[String] = new ArrayBuffer[String]
 	var icon:String = null
 
 	//================================================================================
@@ -102,7 +105,29 @@ class Candidate extends TransportMessage {
 			// Ignore
 		}
 	}
+	
+	//================================================================================
+	// Add primary images 
+	//================================================================================
+	def addPrimaryImages(primary:ArrayBuffer[String]) { 
+		primary map { i =>
+			if (!primary_images.contains(i)) {
+				primary_images += i
+			}
+		}
+	}
 
+	//================================================================================
+	// Add secondary images 
+	//================================================================================
+	def addSecondaryImages(secondary:ArrayBuffer[String]) { 
+		secondary map { i =>
+			if (!secondary_images.contains(i)) {
+				secondary_images += i
+			}
+		}
+	}	
+	
 	//================================================================================
 	// House Keeping
 	//================================================================================
