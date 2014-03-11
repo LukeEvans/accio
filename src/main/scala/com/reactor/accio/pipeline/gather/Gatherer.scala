@@ -134,7 +134,7 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	def defineGatherType(candidate:Candidate): Option[GatherType] = {
 		val types = candidate.types
 	
-		if (types.contains("ns:business.issuer")) {
+		if (types.contains("ns:business.business_operation")) {
 			return Some (Business())
 		}
 		
