@@ -49,7 +49,7 @@ class WikiImageFetcher(args: FlowControlArgs) extends FlowControlActor(args) {
 		
 		// If we don't have any idea where to check wikipedia. Just return 
 		if (candidate == null || candidate.wikipedia_title == null || candidate.wikipedia_title.size <= 1) {
-			reply(origin, Some (photoStrings))
+			reply(origin, Some (StringList(photoStrings)) )
 		}
 		
 		Tools.fetchURL(baseURL + candidate.wikipedia_title) match {
