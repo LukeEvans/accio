@@ -27,7 +27,6 @@ class TwitterGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 		case IdList(list) =>
 			val origin = sender
 			process(origin, list)
-			complete()
 	}	
 	
 	// Process

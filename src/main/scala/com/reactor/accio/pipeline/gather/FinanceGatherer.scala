@@ -35,7 +35,6 @@ class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 		case StringList(companies) =>
 			val origin = sender
 			process(origin, companies)
-			complete()
 	}	
 
 	// Process

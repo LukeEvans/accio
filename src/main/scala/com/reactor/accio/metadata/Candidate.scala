@@ -40,12 +40,12 @@ class Candidate extends TransportMessage {
 			translateMid();
 			
 			// Set static fields
-			icon = "https://s3.amazonaws.com/Channel_Icons/Wikipedia-logo-v2.png";
+			icon = "https://s3.amazonaws.com/Channel_Icons/Wikipedia-logo-v2.png"
 			images = new ArrayList[String]
 			images.add("https://usercontent.googleapis.com/freebase/v1/image" + id +  "?maxwidth=960")
 
 		} catch {
-		  	case e:Exception => e.printStackTrace();
+		  	case e:Exception => e.printStackTrace()
 		}
 	}
 
@@ -56,15 +56,15 @@ class Candidate extends TransportMessage {
 		try {
 
 			if (id.startsWith("/m/")) {
-				mid = id.replaceAll("/m/", "ns:m.");
+				mid = id.replaceAll("/m/", "ns:m.")
 			}
 
 			else if (id.startsWith("/g/")) {
-				mid = id.replaceAll("/g/", "ns:g.");
+				mid = id.replaceAll("/g/", "ns:g.")
 			}
 
 		} catch {
-			case e:Exception => e.printStackTrace();
+			case e:Exception => e.printStackTrace()
 		}
 	}
 
@@ -81,14 +81,14 @@ class Candidate extends TransportMessage {
 	def grabVertexMetaData(details:JsonNode) {
 
 		try {
-			wikipedia_description = details.path("wikipedia_description").asText();
-			wikipedia_title = details.path("wikipedia_title").asText();
+			wikipedia_description = details.path("wikipedia_description").asText()
+			wikipedia_title = scrubWikiTitle(details.path("wikipedia_title").asText())
 			
 			try {
-				notable_for = details.path("notable_for").asText().replaceAll("@en", "");
-				notable_type = details.path("notable_type").asText().replaceAll("@en", "");
+				notable_for = details.path("notable_for").asText().replaceAll("@en", "")
+				notable_type = details.path("notable_type").asText().replaceAll("@en", "")
 			} catch {
-				case e:Exception => e.printStackTrace();
+				case e:Exception => e.printStackTrace()
 			}
 			
 			if (types == null) {
@@ -96,14 +96,22 @@ class Candidate extends TransportMessage {
 			}
 			
 			details.path("types").toList map { n => 
-				types.add(n.asText());
+				types.add(n.asText())
 			}
 			
 		} catch {
-		  	case e:Exception => e.printStackTrace();
-			e.printStackTrace();
+		  	case e:Exception => e.printStackTrace()
+			e.printStackTrace()
 			// Ignore
 		}
+	}
+	
+	//================================================================================
+	// Scrub wiki title
+	//================================================================================
+	def scrubWikiTitle(dirty:String): String = {
+		val clean = dirty.replaceAll("""\\\$0028""", "(").replaceAll("""\\\$0029""", ")")
+		return clean
 	}
 	
 	//================================================================================
@@ -152,6 +160,6 @@ class Candidate extends TransportMessage {
 		return new HashCodeBuilder(17, 31). // two randomly chosen prime numbers
 				append(mid).
 				append(name).
-				toHashCode();
+				toHashCode()
 	}  
 }

@@ -67,11 +67,9 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	  case MetadataContainer(metaData) =>
 	    val origin = sender
 	    process(metaData.copy, null, origin)
-	    complete()
 	  case ConfluenceContainer(metaData, request) =>
 	    val origin = sender
 	    process(metaData.copy, request, origin)
-	    complete()
 	}
 	
 	// Process
@@ -128,6 +126,7 @@ class Gatherer(args:FlowControlArgs) extends FlowControlActor(args) {
 	  			
 	  		case Failure(e) => 
 	  			log.error("An error has occurred: " + e.getMessage())
+	  			reply(origin, None)
 		}	  	
 	}
 	

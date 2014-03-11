@@ -30,7 +30,13 @@ class AccioPipeline(args:FlowControlArgs) extends FlowControlActor(args) {
   val extractor = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="extractor", actorType="com.reactor.accio.pipeline.Extractor"))
   val disambig = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="disambig", actorType="com.reactor.accio.pipeline.Disambiguator"))
   val connector = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="connector", actorType="com.reactor.accio.pipeline.Connector"))
-  val describer = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="describer", actorType="com.reactor.accio.pipeline.Describer"))
+  
+  // Description
+  val flickrImage = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="flickrImageFetcher", parallel=3, actorType="com.reactor.accio.pipeline.images.FlickrFetcher"))
+  val wikiImage = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="wikiImageFetcher", parallel=3, actorType="com.reactor.accio.pipeline.images.WikiImageFetcher"))
+  val describer = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="describer", actorType="com.reactor.accio.pipeline.Describer"), DescriberArgs(flickrImage, wikiImage))
+  
+  // Confluence
   val confluence = FlowControlFactory.flowControlledActorForContext(context, FlowControlConfig(name="confluence", actorType="com.reactor.accio.pipeline.gather.Gatherer"))
   
   // Ready
@@ -40,7 +46,6 @@ class AccioPipeline(args:FlowControlArgs) extends FlowControlActor(args) {
     case RequestContainer(request:AccioRequest) =>
       val origin = sender
       process(request, origin)
-      complete()
   }
   
   // Process
@@ -60,9 +65,10 @@ class AccioPipeline(args:FlowControlArgs) extends FlowControlActor(args) {
 	  
 	  completed onComplete {
 	  	case Success(metadataResponse) =>
-	  		origin ! ResponseContainer(new AccioResponse(req, metadataResponse.metadata))
+	  		reply(origin, ResponseContainer(new AccioResponse(req, metadataResponse.metadata)))
 	  	case Failure(e) => 
-	  	  log.error("An error has occurred: " + e.getMessage())
+	  	  log.error("A pipeline error has occurred: " + e.getMessage())
+	  	  reply(origin, None)
 	  }
   }
   

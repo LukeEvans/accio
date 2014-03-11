@@ -31,7 +31,7 @@ class FlickrFetcher(args: FlowControlArgs) extends FlowControlActor(args) {
 
 	val baseDataUrl = "http://api.flickr.com/services/rest/?&method=flickr.photos.search&format=json&sort=relevance"
 	val apiKey = "ee914fcffa514b5081adc20bef2f6186"	
-	val maxPhotos = 5
+	val maxPhotos = 6
 
 	// Ready
 	ready()
@@ -40,7 +40,6 @@ class FlickrFetcher(args: FlowControlArgs) extends FlowControlActor(args) {
 		case CandidateContainer(candidate) =>
 			val origin = sender
 			processQuery(origin, candidate)
-			complete()
 	}	
 
 	// Process
@@ -59,6 +58,11 @@ class FlickrFetcher(args: FlowControlArgs) extends FlowControlActor(args) {
 					for (photoNode <- responseNode.get("photos").get("photo")) {
 						val photo = new FlickrPhoto(photoNode)
 						photoStrings += photo.url
+						
+						if (photoStrings.size >= maxPhotos) {
+							reply(origin, Some (StringList(photoStrings)) )
+							return
+						}
 					}
 					
 					reply(origin, Some (StringList(photoStrings)) )

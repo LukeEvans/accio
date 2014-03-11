@@ -35,7 +35,6 @@ class YouTubeGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 		case query:String =>
 			val origin = sender
 			processQuery(origin, query)
-			complete()
 	}	
 
 	// Process

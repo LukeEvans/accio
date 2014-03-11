@@ -30,6 +30,9 @@ import com.reactor.accio.transport.StringList
 
 class WikiImageFetcher(args: FlowControlArgs) extends FlowControlActor(args) {
 
+	// Base url
+	val baseURL = """http://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&pithumbsize=1000&titles="""
+		
 	// Ready
 	ready()
 
@@ -37,7 +40,6 @@ class WikiImageFetcher(args: FlowControlArgs) extends FlowControlActor(args) {
 		case CandidateContainer(candidate) =>
 			val origin = sender
 			processQuery(origin, candidate)
-			complete()
 	}	
 
 	// Process
@@ -45,9 +47,55 @@ class WikiImageFetcher(args: FlowControlArgs) extends FlowControlActor(args) {
 
 		val photoStrings = ArrayBuffer[String]()
 		
-		photoStrings += "YOYOYO_Wiki.jpg"
+		// If we don't have any idea where to check wikipedia. Just return 
+		if (candidate == null || candidate.wikipedia_title == null || candidate.wikipedia_title.size <= 1) {
+			reply(origin, Some (photoStrings))
+		}
 		
-		// Reply
-		reply(origin, Some( StringList(photoStrings)))
+		Tools.fetchURL(baseURL + candidate.wikipedia_title) match {
+			case Some (fetched) =>
+				try {
+					val thumbnailNode = parseThumbnail(fetched)
+					val photo = new WikiPhoto(thumbnailNode)
+					
+					if (photo.photoValid) {
+						photoStrings += photo.source
+					}
+					
+					reply(origin, Some (StringList(photoStrings)) )
+				}
+				
+				catch {
+					case e:Exception =>
+						reply(origin, None)
+				}
+				
+			case None => reply(origin, None)
+		}
+		
+	}
+	
+	// Parse thumbnail out of response
+	def parseThumbnail(response:JsonNode): JsonNode = {
+		val thumbnail = response.get("query").get("pages").findValue("thumbnail")
+		return thumbnail
+	}
+}
+
+// Wikipedia Photo
+class WikiPhoto(photoNode:JsonNode) extends TransportMessage {
+	
+	val source = if (photoNode.has("source")) photoNode.get("source").asText() else null
+	val height = if (photoNode.has("height")) photoNode.get("height").asInt() else 0
+	val width = if (photoNode.has("width")) photoNode.get("width").asInt() else 0
+
+	def photoValid: Boolean = {
+		if (height >= 460 && width >= 640) {
+			return true
+		}
+		
+		else {
+			return false
+		}
 	}
 }

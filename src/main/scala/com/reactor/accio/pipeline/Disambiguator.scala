@@ -28,7 +28,6 @@ class Disambiguator(args:FlowControlArgs) extends FlowControlActor(args) {
 	  case MetadataContainer(metaData) =>
 	    val origin = sender
 	    process(metaData.copy, origin)
-	    complete()
 	}
 	
 	// Process
@@ -45,6 +44,7 @@ class Disambiguator(args:FlowControlArgs) extends FlowControlActor(args) {
 	  	  reply(origin, MetadataContainer(metaData))
 	  	case Failure(e) => 
 	  	  log.error("An error has occurred: " + e.getMessage())
+	  	  reply(origin, None)
 	  }
 	  
 	}

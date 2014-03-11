@@ -19,7 +19,6 @@ class ItunesGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
   def receive ={
     case query:String =>
       processQuery(query, sender)
-      complete()
     case a:Any => println(a)
   }
   
@@ -36,6 +35,7 @@ class ItunesGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
       case None =>
         println("No response from itunes api")
     }
+    
     reply(origin, ConfluenceNodeList(null))
   }
   

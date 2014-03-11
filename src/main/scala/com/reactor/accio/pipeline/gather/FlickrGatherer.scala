@@ -36,10 +36,8 @@ class FlickrGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 		case query:String =>
 			val origin = sender
 			processQuery(origin, query)
-			complete()
 		case KeywordContainer(keyword) =>
 		  processKeyword(keyword, sender)
-		  complete()
 	}	
 
 	// Process
@@ -104,7 +102,7 @@ class FlickrGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 
 
 
-// Youtube video class
+// Flickr photo class
 class FlickrPhoto(photoNode:JsonNode) extends TransportMessage {
 		
 	val id = if (photoNode.has("id")) photoNode.get("id").asText() else null

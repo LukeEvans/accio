@@ -32,7 +32,13 @@ import com.reactor.accio.transport.CandidateContainer
 import com.reactor.accio.transport.CandidateContainer
 
 // Describer args
-case class DescriberArgs(flickrFetcher:ActorRef, wikiImageFetcher:ActorRef) extends FlowControlArgs 
+case class DescriberArgs(flickrFetcher:ActorRef, wikiImageFetcher:ActorRef) extends FlowControlArgs {
+  override def workerArgs(): DescriberArgs = {
+  	val newArgs = new DescriberArgs(flickrFetcher, wikiImageFetcher)
+  	newArgs.addMaster(master)
+  	return newArgs
+  }  	
+}
 
 // Image intermediate
 case class ImageIntermediate(primary:Option[StringList], secondary:Option[StringList])
@@ -53,12 +59,11 @@ class Describer(args:DescriberArgs) extends FlowControlActor(args) {
 	  case MetadataContainer(metaData) =>
 	    val origin = sender
 	    process(metaData.copy, origin)
-	    complete()
 	}
 	
 	// Process
 	def process(metaData:MetaData, origin:ActorRef) {
-		implicit val timeout = Timeout(3 seconds)
+		implicit val timeout = Timeout(5 seconds)
 		
 		val futures = new ArrayBuffer[Future[Option[Candidate]]]()
 		
@@ -74,7 +79,8 @@ class Describer(args:DescriberArgs) extends FlowControlActor(args) {
 	  			val connectedMetaData = metaData
 	  			reply(origin, MetadataContainer(connectedMetaData))
 	  		case Failure(e) => 
-	  			log.error("An error has occurred: " + e.getMessage())
+	  			log.error("A describer error has occurred: " + e.getMessage())
+	  			reply(origin, None)
 		}			
 	}
 	
@@ -102,17 +108,17 @@ class DescriberFetcher(args:DescriberArgs) extends FlowControlActor(args) {
 	// Process
 	def process(candidate:Candidate, origin:ActorRef) {
 	  // Timeout
-	  implicit val timeout = Timeout(3 seconds)
-	  
-	  // Fetch images
-	  val primaryFuture =  (wikiImageFetcher ? CandidateContainer(candidate)).mapTo[Option[StringList]] 
-	  val secondaryFuture = (flickrFetcher ? CandidateContainer(candidate)).mapTo[Option[StringList]] 
+	  implicit val timeout = Timeout(5 seconds)
 	  
 	  val results: Option[JsonNode] = graphdb.findVertexDetails(candidate.mid)
 	  
 	  results match {
 	    case Some(details) => 
 	      candidate.grabVertexMetaData(details)
+
+	      // Fetch images
+	      val primaryFuture =  (wikiImageFetcher ? CandidateContainer(candidate)).mapTo[Option[StringList]] 
+	      val secondaryFuture = (flickrFetcher ? CandidateContainer(candidate)).mapTo[Option[StringList]]
 	      
 	      // Collect Images
 	      val fetched = for {
@@ -124,15 +130,15 @@ class DescriberFetcher(args:DescriberArgs) extends FlowControlActor(args) {
 	      	case Success(completed) =>
 	      		completed.primary match {
 	      			case Some(urls) => candidate.addPrimaryImages(urls.strings)
-	      			case None =>
+	      			case None => 
 	      		}
 	      		
 	      		completed.secondary match {
 	      			case Some(urls) => candidate.addSecondaryImages(urls.strings)
-	      			case None =>
+	      			case None => 
 	      		}
 	      		
-	      		reply(origin, candidate)
+	      		reply(origin, Some (candidate) )
 	      		
 	  		case Failure(e) => 
 	  			log.error("A fetching error has occurred: " + e.getMessage())
