@@ -15,6 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 import scala.util.Failure
 import com.reactor.accio.transport.MetadataContainer
+import com.reactor.accio.pipeline.gather.YahooFinance
 
 // Disambiguate Actor
 class Disambiguator(args:FlowControlArgs) extends FlowControlActor(args) {
@@ -35,7 +36,8 @@ class Disambiguator(args:FlowControlArgs) extends FlowControlActor(args) {
 	  
 	  // Get ids
 	  val futures: List[Future[Option[Keyword]]] = metaData.keywords.toList map { keyword =>
-	  	Future { fetch(disambigURL + keyword.original_text, keyword)   }
+	  	val url = defineURL(keyword)
+	  	Future { fetch(url, keyword)   }
       }
 	  
 	  // Sequence list
@@ -47,6 +49,25 @@ class Disambiguator(args:FlowControlArgs) extends FlowControlActor(args) {
 	  	  reply(origin, None)
 	  }
 	  
+	}
+	
+	// Determine best URL for keyword
+	def defineURL(keyword:Keyword): String = {
+		
+		// Disambig term
+		var disambigTerm = keyword.original_text
+		
+		// If it looks like we have a stock ticker, try the company name instead
+		if (YahooFinance.possibleTicker(disambigTerm)) {
+			YahooFinance.validTickerSymbol(disambigTerm) match {
+				case Some(company_name) => disambigTerm = company_name
+				case None =>
+			}
+		}
+		
+		// Buld url
+		val url = disambigURL + disambigTerm
+		return url
 	}
 	
 	// Fetching

@@ -22,58 +22,12 @@ import com.reactor.accio.transport.ConfluenceNodeList
 import com.reactor.accio.transport.StringList
 import java.math.BigDecimal
 import com.reactor.accio.transport.TransportMessage
+import com.reactor.accio.transport.ConfluenceNodeList
 
-class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
-
+object YahooFinance {
 	val symbolFetchBaseURL = "http://d.yimg.com/autoc.finance.yahoo.com/autoc?callback=YAHOO.Finance.SymbolSuggest.ssCallback&query="
-	val stockFetchBaseURL = """http://query.yahooapis.com/v1/public/yql?format=json&env=store://datatables.org/alltableswithkeys&q=select * from yahoo.finance.quote where symbol in """	
-
-	// Ready
-	ready()
-
-	def receive = {
-		case StringList(companies) =>
-			val origin = sender
-			process(origin, companies)
-	}	
-
-	// Process
-	def process(origin:ActorRef, companies:ArrayBuffer[String]) {
-		val confluenceNodes = ArrayBuffer[Any]()
+	val stockFetchBaseURL = """http://query.yahooapis.com/v1/public/yql?format=json&env=store://datatables.org/alltableswithkeys&q=select * from yahoo.finance.quote where symbol in """
 		
-		// Get url
-		val url = buildURL(getSymbols(companies))
-			
-		try {
-			
-			Tools.fetchURL(url) match {
-				case Some ( response ) =>
-					
-					val quoteNode = response.get("query").get("results").get("quote")
-					if (quoteNode.isArray()) {
-						quoteNode.toList map { quoteNode =>
-							confluenceNodes += new Stock(quoteNode)
-						}
-					}
-					
-					else {
-						confluenceNodes += new Stock(quoteNode) 
-					}
-					
-				case None =>
-			}
-			
-			// Reply
-			reply(origin, ConfluenceNodeList(confluenceNodes))
-		
-		} catch {
-			case e:Exception =>
-				log.error("Fetching stock quote failed from URL: " + url)
-				reply(origin, ConfluenceNodeList(confluenceNodes))
-		}
-		
-	}
-
 	// Get list of symbols
 	def getSymbols(companies:ArrayBuffer[String]): ArrayBuffer[String] = {
 		val symbols = ArrayBuffer[String]()
@@ -82,7 +36,7 @@ class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 			Tools.fetchYahooURL(symbolFetchBaseURL + c) match {
 				case Some ( symbolNode ) =>
 					symbols += symbolNode.get("ResultSet").get("Result").get(0).get("symbol").asText()
-				case None => log.error("No symbol found for: " + c)
+				case None => 
 			}
 		}
 		
@@ -98,6 +52,88 @@ class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
 		}
 		
 		return url.substring(0, url.length() - 1) + ")"
+	}		
+	
+	// Fetch stock objects
+	def fetchStockFromURL(url:String): ArrayBuffer[Stock] = {
+		val stockList = ArrayBuffer[Stock]()
+		
+		try {
+			
+			Tools.fetchURL(url) match {
+				case Some ( response ) =>
+					
+					val quoteNode = response.get("query").get("results").get("quote")
+					if (quoteNode.isArray()) {
+						quoteNode.toList map { quoteNode =>
+							stockList += new Stock(quoteNode)
+						}
+					}
+					
+					else {
+						stockList += new Stock(quoteNode) 
+					}
+					
+				case None =>
+			}
+		} 	
+		
+		return stockList
+	}
+	
+	// Determine if symbol is valid
+	def validTickerSymbol(symbol:String): Option[String] = {
+		
+		if (symbol == null || symbol.length() <= 1) return None
+		
+		try {
+			val buff = ArrayBuffer[String]()
+			buff += symbol
+			
+			val url = buildURL(buff)
+			val stock = fetchStockFromURL(url).get(0)
+			
+			if (stock.stock_exchange != null) {
+				return Some (stock.company)
+			}
+			
+			return None
+			
+		} catch {
+			case e:Exception => return None
+		}
+		
+	}
+	
+	// Determine if string could be a ticker
+	def possibleTicker(ticker:String): Boolean = {
+		ticker matches "[A-Z]{3,5}"
+	}
+}
+
+class FinanceGatherer(args: FlowControlArgs) extends FlowControlActor(args) {
+
+	// Ready
+	ready()
+
+	def receive = {
+		case StringList(companies) =>
+			val origin = sender
+			process(origin, companies)
+	}	
+
+	// Process
+	def process(origin:ActorRef, companies:ArrayBuffer[String]) {
+		val confluenceNodes = ArrayBuffer[Any]()
+		
+		// Get url
+		val url = YahooFinance.buildURL(YahooFinance.getSymbols(companies))
+		YahooFinance.fetchStockFromURL(url) map { stock =>
+			confluenceNodes += stock
+		}
+		
+		// Reply
+		reply(origin, ConfluenceNodeList(confluenceNodes) )
 	}
 }
 
@@ -114,12 +150,14 @@ class Stock(stockNode:JsonNode) extends TransportMessage {
 	var value:Double = 0
 	var change:Double = 0
 	var percent_change:String = null
-
+	var stock_exchange:String = null
+	
 	if (stockNode != null) {
 		
 		company = stockNode.get("Name").asText()
 		id = Tools.generateHash(company)
 		symbol = stockNode.path("symbol").asText()
+		stock_exchange = stockNode.path("StockExchange").asText()
 	
 		if (stockNode.has("LastTradePriceOnly") && stockNode.has("Change")) {
 			updateValues(stockNode.path("LastTradePriceOnly").asDouble(), stockNode.path("Change").asDouble())

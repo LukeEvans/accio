@@ -80,7 +80,8 @@ class Describer(args:DescriberArgs) extends FlowControlActor(args) {
 	  			reply(origin, MetadataContainer(connectedMetaData))
 	  		case Failure(e) => 
 	  			log.error("A describer error has occurred: " + e.getMessage())
-	  			reply(origin, None)
+	  			val failedMetaData = metaData
+	  			reply(origin, MetadataContainer(failedMetaData))
 		}			
 	}
 	
